@@ -1,21 +1,39 @@
 import 'package:code_learn/app_constants/button.dart';
 import 'package:code_learn/app_constants/colors.dart';
 import 'package:code_learn/app_constants/textfield.dart';
+import 'package:code_learn/utils/customtextformfiled.dart';
 import 'package:code_learn/view/navigPage.dart';
 import 'package:code_learn/view/registerPage.dart';
 import 'package:flutter/material.dart';
 
-class Loginpage extends StatelessWidget {
+import '../utils/app_text.dart';
+import '../utils/app_text_style.dart';
+
+class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
 
   @override
+  State<Loginpage> createState() => _LoginpageState();
+}
+
+class _LoginpageState extends State<Loginpage> {
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+   _emailController.dispose();
+   _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.champagnePink,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -27,51 +45,17 @@ class Loginpage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        "Login",
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      const AppText(
+                        text: "Hello there!",
+                        style:  AppTextStyle.headline1,
+
                       ),
                       const SizedBox(height: 30),
-                      TextFormField(
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          border: TextfieldDecoration.outlineDecoration,
-                          hintText: "Email",
-                          prefixIcon: Icon(Icons.email),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Email is required';
-                          } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$')
-                              .hasMatch(value)) {
-                            return 'Enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        controller: passwordController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          border: TextfieldDecoration.outlineDecoration,
-                          hintText: "Password",
-                          prefixIcon: Icon(Icons.lock),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Password is required';
-                          } else if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 30),
+                     CustomTextFormField(controller: _emailController, hintText: "Username/Email")
+
+                     , const SizedBox(height: 20),
+                     CustomTextFormField(controller: _passwordController, hintText: "Password",obscureText: true,)
+                     , const SizedBox(height: 30),
                       Button(
                         text: "Sign In",
                         onPressed: () {
