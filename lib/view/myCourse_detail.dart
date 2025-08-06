@@ -1,4 +1,5 @@
 import 'package:code_learn/app_constants/colors.dart';
+import 'package:code_learn/utils/app_text_style.dart' show AppTextStyle;
 import 'package:code_learn/view/github.dart';
 import 'package:code_learn/view/video_viewer.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class _MycourseDetailState extends State<MycourseDetail> {
           children: [
             const Text(
               "Course Detail",
-              style: TextStyle(fontSize: 30, color: Colors.white),
+              style: AppTextStyle.headline1,
             ),
             const SizedBox(height: 20),
             ClipRRect(
@@ -41,11 +42,7 @@ class _MycourseDetailState extends State<MycourseDetail> {
             const SizedBox(height: 16),
             const Text(
               'Flutter Full Course',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyle.headline2
             ),
             const SizedBox(height: 16),
             Row(

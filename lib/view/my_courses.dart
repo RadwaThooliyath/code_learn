@@ -1,3 +1,4 @@
+import 'package:code_learn/utils/app_text_style.dart';
 import 'package:code_learn/view/course_detail.dart';
 import 'package:code_learn/view/myCourse_detail.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,7 @@ class SelectedCoursesPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("My Selected Courses", style: TextStyle(color: Colors.white)),
+        title: const Text("My Selected Courses", style: AppTextStyle.headline2),
         backgroundColor: AppColors.background,
         iconTheme: const IconThemeData(color: Colors.white),
       ),

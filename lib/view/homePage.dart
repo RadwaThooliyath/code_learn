@@ -1,3 +1,4 @@
+import 'package:code_learn/utils/app_text_style.dart';
 import 'package:code_learn/view/course_types.dart';
 import 'package:flutter/material.dart';
 import 'package:code_learn/app_constants/colors.dart';
@@ -38,11 +39,12 @@ class _HomepageState extends State<Homepage> {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   "Choose your course",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30,
-                  ),
+                   style: AppTextStyle.headline1
+                  // TextStyle(
+                  //   color: Colors.white,
+                  //   fontWeight: FontWeight.bold,
+                  //   fontSize: 30,
+                  // ),
                 ),
               ),
               const SizedBox(height: 20),

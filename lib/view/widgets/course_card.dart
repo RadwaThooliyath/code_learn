@@ -5,7 +5,7 @@ class CourseCard extends StatelessWidget {
   final Color cardColor;
   final Color textColor;
   final VoidCallback? onDetailsTap;
-  final double? width; // 👈 Add this line
+  final double? width;
 
   const CourseCard({
     super.key,
@@ -13,7 +13,7 @@ class CourseCard extends StatelessWidget {
     required this.cardColor,
     required this.textColor,
     this.onDetailsTap,
-    this.width, // 👈 Include in constructor
+    this.width,
   });
 
   @override

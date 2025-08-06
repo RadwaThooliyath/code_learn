@@ -1,3 +1,4 @@
+import 'package:code_learn/utils/app_text_style.dart';
 import 'package:flutter/material.dart';
 import 'course_card.dart'; // import the CourseCard widget
 
@@ -26,11 +27,12 @@ class CourseHorizontalList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 22,
-            ),
+            style: AppTextStyle.headline2
+            //TextStyle(
+              // color: Colors.white,
+              // fontWeight: FontWeight.w600,
+              // fontSize: 22,
+            //),
           ),
         ),
         const SizedBox(height: 10),
