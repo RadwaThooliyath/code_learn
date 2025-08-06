@@ -54,7 +54,11 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       initialValue: widget.value,
       cursorColor: AppColors.champagnePink,
       readOnly: widget.readOnly,
-      style: themedata.textTheme.titleSmall,
+      style: const TextStyle(
+        color: AppColors.background,
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      ),
       maxLines: widget.maxlines,
       keyboardType: widget.type,
       controller: widget.controller,
@@ -69,18 +73,16 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         errorStyle: TextStyle(
             color: Colors.red, fontStyle: FontStyle.italic, fontSize: 12),
         hintStyle: TextStyle(
-            color: Colors.white70,
+            color: Colors.grey[600],
             fontSize: 14,
-            fontStyle: FontStyle.italic,
-            fontFamily: 'Inter',
             fontWeight: FontWeight.w400),
         hintText: widget.hintText,
         enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide(color: Colors.transparent)),
+            borderSide: BorderSide(color: Colors.grey[300]!, width: 1)),
         focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide(color: Colors.transparent)),
+            borderSide: BorderSide(color: AppColors.robinEggBlue, width: 2)),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.red),

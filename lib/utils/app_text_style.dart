@@ -4,13 +4,13 @@ class AppTextStyle {
   static const TextStyle headline1 = TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.bold,
-    color: Colors.black,
+    color: Colors.white,
   );
 
   static const TextStyle headline2 = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.w600,
-    color: Colors.black87,
+    color: Colors.white,
   );
 
   static const TextStyle bodyText = TextStyle(

@@ -1,6 +1,8 @@
 import 'package:code_learn/utils/app_text_style.dart';
+import 'package:code_learn/utils/app_spacing.dart';
+import 'package:code_learn/app_constants/colors.dart';
 import 'package:flutter/material.dart';
-import 'course_card.dart'; // import the CourseCard widget
+import 'course_card.dart';
 
 class CourseHorizontalList extends StatelessWidget {
   final String title;
@@ -24,24 +26,48 @@ class CourseHorizontalList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            title,
-            style: AppTextStyle.headline2
-            //TextStyle(
-              // color: Colors.white,
-              // fontWeight: FontWeight.w600,
-              // fontSize: 22,
-            //),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  backgroundColor: AppColors.robinEggBlue.withValues(alpha: 0.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  "View All",
+                  style: TextStyle(
+                    color: AppColors.robinEggBlue,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 10),
+        AppSpacing.small,
         SizedBox(
-          height: 250,
+          height: 260,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: itemCount,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) {
               return CourseCard(
                 index: index,
