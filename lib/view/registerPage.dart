@@ -2,6 +2,7 @@ import 'package:code_learn/app_constants/colors.dart';
 import 'package:code_learn/utils/app_spacing.dart';
 import 'package:code_learn/utils/app_decoration.dart';
 import 'package:code_learn/utils/responsive_helper.dart';
+import 'package:code_learn/utils/customtextformfiled.dart';
 import 'package:code_learn/view/loginPage.dart';
 import 'package:code_learn/view_model/auth_viewModel.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +23,6 @@ class _RegisterpageState extends State<Registerpage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-
-  bool _passwordVisible = false;
-  bool _confirmPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -86,33 +84,19 @@ class _RegisterpageState extends State<Registerpage> {
                         textAlign: TextAlign.center,
                       ),
                       AppSpacing.large,
-                      TextFormField(
+                      CustomTextFormField(
                         controller: nameController,
-                        style: const TextStyle(
-                          color: AppColors.background,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: AppDecoration.formFieldDecoration(
-                          hintText: "Full Name",
-                          prefixIcon: const Icon(Icons.person, color: Colors.grey),
-                        ),
+                        hintText: "Full Name",
+                        prefixIcon: const Icon(Icons.person, color: Colors.grey),
                         validator: (value) =>
                         value == null || value.isEmpty ? 'Name is required' : null,
                       ),
                       AppSpacing.small,
-                      TextFormField(
+                      CustomTextFormField(
                         controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        style: const TextStyle(
-                          color: AppColors.background,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: AppDecoration.formFieldDecoration(
-                          hintText: "Email Address",
-                          prefixIcon: const Icon(Icons.email, color: Colors.grey),
-                        ),
+                        hintText: "Email Address",
+                        type: TextInputType.emailAddress,
+                        prefixIcon: const Icon(Icons.email, color: Colors.grey),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Email is required';
@@ -124,18 +108,11 @@ class _RegisterpageState extends State<Registerpage> {
                         },
                       ),
                       AppSpacing.small,
-                      TextFormField(
+                      CustomTextFormField(
                         controller: phoneController,
-                        keyboardType: TextInputType.phone,
-                        style: const TextStyle(
-                          color: AppColors.background,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: AppDecoration.formFieldDecoration(
-                          hintText: "Phone Number",
-                          prefixIcon: const Icon(Icons.phone, color: Colors.grey),
-                        ),
+                        hintText: "Phone Number",
+                        type: TextInputType.phone,
+                        prefixIcon: const Icon(Icons.phone, color: Colors.grey),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Phone number is required';
@@ -146,43 +123,18 @@ class _RegisterpageState extends State<Registerpage> {
                         },
                       ),
                       AppSpacing.small,
-                      TextFormField(
+                      CustomTextFormField(
                         controller: addressController,
-                        style: const TextStyle(
-                          color: AppColors.background,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: AppDecoration.formFieldDecoration(
-                          hintText: "Address (Optional)",
-                          prefixIcon: const Icon(Icons.location_on, color: Colors.grey),
-                        ),
-                        maxLines: 2,
+                        hintText: "Address (Optional)",
+                        prefixIcon: const Icon(Icons.location_on, color: Colors.grey),
+                        maxlines: 2,
                       ),
                       AppSpacing.small,
-                      TextFormField(
+                      CustomTextFormField(
                         controller: passwordController,
-                        obscureText: !_passwordVisible,
-                        style: const TextStyle(
-                          color: AppColors.background,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: AppDecoration.formFieldDecoration(
-                          hintText: "Password",
-                          prefixIcon: const Icon(Icons.lock, color: Colors.grey),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                              color: Colors.grey,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _passwordVisible = !_passwordVisible;
-                              });
-                            },
-                          ),
-                        ),
+                        hintText: "Password",
+                        obscureText: true,
+                        prefixIcon: const Icon(Icons.lock, color: Colors.grey),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Password is required';
@@ -193,31 +145,11 @@ class _RegisterpageState extends State<Registerpage> {
                         },
                       ),
                       AppSpacing.small,
-                      TextFormField(
+                      CustomTextFormField(
                         controller: confirmController,
-                        obscureText: !_confirmPasswordVisible,
-                        style: const TextStyle(
-                          color: AppColors.background,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: AppDecoration.formFieldDecoration(
-                          hintText: "Confirm Password",
-                          prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _confirmPasswordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.grey,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _confirmPasswordVisible = !_confirmPasswordVisible;
-                              });
-                            },
-                          ),
-                        ),
+                        hintText: "Confirm Password",
+                        obscureText: true,
+                        prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
                         validator: (value) {
                           if (value != passwordController.text) {
                             return 'Passwords do not match';
