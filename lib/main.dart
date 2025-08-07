@@ -1,6 +1,7 @@
-import 'package:code_learn/view/homePage.dart';
 import 'package:code_learn/view/loginPage.dart';
+import 'package:code_learn/view_model/auth_viewModel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main(){
   runApp(MyApp());
@@ -10,8 +11,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home:Loginpage() ,debugShowCheckedModeBanner: false,
+    return MultiProvider(
+      providers: [
+         ChangeNotifierProvider(create: (context) => AuthViewModel(),)
+      ],
+      child: MaterialApp(
+        home:Loginpage() ,debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

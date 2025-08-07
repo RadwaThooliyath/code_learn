@@ -5,7 +5,9 @@ import 'package:code_learn/utils/app_decoration.dart';
 import 'package:code_learn/utils/responsive_helper.dart';
 import 'package:code_learn/view/navigPage.dart';
 import 'package:code_learn/view/registerPage.dart';
+import 'package:code_learn/view_model/auth_viewModel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
@@ -137,16 +139,38 @@ class _LoginpageState extends State<Loginpage> {
                                 borderRadius: AppDecoration.borderRadiusL,
                               ),
                             ),
-                            onPressed: () {
+                            onPressed: () async {
                               if (_formKey.currentState!.validate()) {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Navigpage()),
-                                      (route) => false,
+                                final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+
+                                await authViewModel.login(
+                                  _emailController.text.trim(),
+                                  _passwordController.text,
                                 );
+
+                                if (authViewModel.error.isEmpty && authViewModel.user != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Login successful"),
+                                      backgroundColor: AppColors.robinEggBlue,
+                                    ),
+                                  );
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const Navigpage()),
+                                        (route) => false,
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Login failed: ${authViewModel.error}"),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                }
                               }
                             },
+
                             child: const Text(
                               "Sign In",
                               style: TextStyle(
