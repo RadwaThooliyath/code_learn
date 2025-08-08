@@ -3,9 +3,11 @@ import 'package:code_learn/utils/app_spacing.dart';
 import 'package:code_learn/utils/app_decoration.dart';
 import 'package:code_learn/utils/responsive_helper.dart';
 import 'package:code_learn/view/course_types.dart';
+import 'package:code_learn/view_model/auth_viewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:code_learn/app_constants/colors.dart';
 import 'package:code_learn/view/course_detail.dart';
+import 'package:provider/provider.dart';
 
 import 'widgets/card_list.dart';
 
@@ -108,29 +110,72 @@ class _HomepageState extends State<Homepage> {
                               onPressed: () {},
                               padding: const EdgeInsets.all(8),
                             ),
-                            const SizedBox(width: 12),
-                            GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [AppColors.brightPinkCrayola, AppColors.coral],
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.logout,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              onPressed: () async {
+                                final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+                                
+                                // Show confirmation dialog
+                                final shouldLogout = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Logout'),
+                                    content: const Text('Are you sure you want to logout?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.red,
+                                        ),
+                                        child: const Text('Logout'),
+                                      ),
+                                    ],
                                   ),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    "J",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                );
+
+                                if (shouldLogout == true) {
+                                  await authViewModel.logout();
+                                  // Navigation will be handled automatically by AuthWrapper
+                                }
+                              },
+                              padding: const EdgeInsets.all(8),
+                            ),
+                            const SizedBox(width: 4),
+                            Consumer<AuthViewModel>(
+                              builder: (context, authViewModel, child) {
+                                return GestureDetector(
+                                  onTap: () {},
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [AppColors.brightPinkCrayola, AppColors.coral],
+                                      ),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        authViewModel.user?.name?.substring(0, 1).toUpperCase() ?? "U",
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -145,27 +190,31 @@ class _HomepageState extends State<Homepage> {
                 child: Container(
                   color: AppColors.background,
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Hello, John! 👋",
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        "What would you like to learn today?",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  child: Consumer<AuthViewModel>(
+                    builder: (context, authViewModel, child) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Hello, ${authViewModel.user?.name ?? 'User'}! 👋",
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            "What would you like to learn today?",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
