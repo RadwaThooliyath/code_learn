@@ -1,9 +1,9 @@
-import 'package:code_learn/utils/app_text_style.dart';
-import 'package:code_learn/view/course_detail.dart';
-import 'package:code_learn/view/myCourse_detail.dart';
+import 'package:uptrail/utils/app_text_style.dart';
+import 'package:uptrail/view/course_detail.dart';
+import 'package:uptrail/view/myCourse_detail.dart';
 import 'package:flutter/material.dart';
-import 'package:code_learn/app_constants/colors.dart';
-import 'package:code_learn/view/widgets/course_card.dart';
+import 'package:uptrail/app_constants/colors.dart';
+import 'package:uptrail/view/widgets/course_card.dart';
 
 class SelectedCoursesPage extends StatelessWidget {
   const SelectedCoursesPage({super.key});

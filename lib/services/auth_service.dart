@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:code_learn/api_constants/api_constants.dart';
-import 'package:code_learn/model/user_model.dart';
-import 'package:code_learn/services/storage_service.dart';
+import 'package:uptrail/api_constants/api_constants.dart';
+import 'package:uptrail/model/user_model.dart';
+import 'package:uptrail/services/storage_service.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
@@ -33,6 +33,11 @@ class AuthService {
         if (accessToken != null) {
           print("💾 Saving access token: ${accessToken.substring(0, 10)}...");
           await StorageService.saveToken(accessToken);
+          
+          if (refreshToken != null) {
+            print("💾 Saving refresh token: ${refreshToken.substring(0, 10)}...");
+            await StorageService.saveRefreshToken(refreshToken);
+          }
           
           // Decode JWT to extract user info
           try {
@@ -138,5 +143,49 @@ class AuthService {
 
   Future<bool> isLoggedIn() async {
     return await StorageService.isLoggedIn();
+  }
+
+  Future<String?> refreshToken() async {
+    try {
+      final refreshToken = await StorageService.getRefreshToken();
+      if (refreshToken == null) {
+        print("❌ No refresh token available");
+        return null;
+      }
+
+      final url = Uri.parse(ApiConstants.refresh);
+      final requestBody = {"refresh": refreshToken};
+      
+      print("🔄 Refreshing token at: $url");
+      
+      final response = await http.post(
+        url,
+        headers: {"content-type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+      
+      print("Refresh Response Status: ${response.statusCode}");
+      print("Refresh Response Body: ${response.body}");
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newAccessToken = data['access'] as String?;
+        
+        if (newAccessToken != null) {
+          print("✅ Token refreshed successfully");
+          await StorageService.saveToken(newAccessToken);
+          return newAccessToken;
+        }
+      } else {
+        print("❌ Token refresh failed: ${response.statusCode}");
+        // If refresh fails, clear all data and force re-login
+        await StorageService.clearAllData();
+      }
+    } catch (e) {
+      print("❌ Error refreshing token: $e");
+      await StorageService.clearAllData();
+    }
+    
+    return null;
   }
 }

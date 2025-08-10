@@ -1,55 +1,39 @@
-import 'dart:io';
-
 class ApiConstants {
-  static const bool kDebugMode = bool.fromEnvironment('dart.vm.product') == false;
+  static const String baseUrl = "https://uptrail.info/api";
+  static const String authBaseUrl = "$baseUrl/users/auth";
+  static const String coursesBaseUrl = "$baseUrl/courses";
+  static const String usersBaseUrl = "$baseUrl/users";
   
-  static const String _macLocalBaseUrl = "http://127.0.0.1:8000/api/users/auth";
-  static const String _iOSSimulatorBaseUrl = "http://localhost:8000/api/users/auth";
-  static const String _androidEmulatorBaseUrl = "http://10.0.2.2:8000/api/users/auth";
+  // Auth endpoints
+  static const String loginEndpoint = "/login/";
+  static const String registerEndpoint = "/register/";
+  static const String refreshEndpoint = "/refresh/";
   
-  // For real devices - Your Mac's actual IP address
-  // Found with: ifconfig | grep "inet " | grep -v 127.0.0.1
-  static const String _realDeviceBaseUrl = "http://192.168.1.46:8000/api/users/auth"; // Your actual Mac IP
+  // Profile endpoints
+  static const String profileEndpoint = "/profile/";
+  static const String changePasswordEndpoint = "/profile/change-password/";
   
-  static const String _productionBaseUrl = "https://your-production-api.com/api/users/auth";
+  // Course endpoints
+  static const String coursesEndpoint = "/";
+  static const String courseSearchEndpoint = "/search/";
+  static const String courseCategoriesEndpoint = "/categories/";
+  static const String enrolledCoursesEndpoint = "/enrolled/";
   
-  static String get authBase {
-    if (kDebugMode) {
-      if (Platform.isIOS) {
-        final isSimulator = _isSimulator();
-        final url = isSimulator ? _iOSSimulatorBaseUrl : _realDeviceBaseUrl;
-        print("📱 iOS Platform - Simulator: $isSimulator, URL: $url");
-        return url;
-      } else if (Platform.isAndroid) {
-        final isEmulator = _isEmulator();
-        final url = isEmulator ? _androidEmulatorBaseUrl : _realDeviceBaseUrl;
-        print("🤖 Android Platform - Emulator: $isEmulator, URL: $url");
-        return url;
-      } else {
-        print("💻 Desktop Platform - URL: $_macLocalBaseUrl");
-        return _macLocalBaseUrl;
-      }
-    }
-    return _productionBaseUrl;
-  }
+  // Auth URLs
+  static String get login => "$authBaseUrl$loginEndpoint";
+  static String get register => "$authBaseUrl$registerEndpoint";
+  static String get refresh => "$authBaseUrl$refreshEndpoint";
   
-  // Detect if running on simulator/emulator
-  static bool _isSimulator() {
-    if (Platform.isIOS) {
-      // iOS Simulator detection - check multiple indicators
-      return Platform.environment['SIMULATOR_DEVICE_NAME'] != null ||
-             Platform.environment['SIMULATOR_ROOT'] != null ||
-             Platform.environment.containsKey('SIMULATOR_UDID');
-    } else if (Platform.isAndroid) {
-      // Android Emulator detection
-      return Platform.environment.containsKey('ANDROID_EMU_SDK_VERSION') ||
-             Platform.environment.containsKey('ANDROID_AVD_NAME');
-    }
-    return false;
-  }
+  // Course URLs
+  static String get courses => "$coursesBaseUrl$coursesEndpoint";
+  static String get courseSearch => "$coursesBaseUrl$courseSearchEndpoint";
+  static String get courseCategories => "$coursesBaseUrl$courseCategoriesEndpoint";
+  static String get enrolledCourses => "$coursesBaseUrl$enrolledCoursesEndpoint";
   
-  static bool _isEmulator() => _isSimulator();
+  // Profile URLs
+  static String get userProfile => "$usersBaseUrl$profileEndpoint";
+  static String get changePassword => "$usersBaseUrl$changePasswordEndpoint";
   
-  static String get login => "$authBase/login/";
-  static String get register => "$authBase/register/";
+  // Course detail URL (requires course ID)
+  static String courseDetail(int courseId) => "$coursesBaseUrl/$courseId/";
 }

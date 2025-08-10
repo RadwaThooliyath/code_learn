@@ -1,6 +1,6 @@
-import 'package:code_learn/utils/app_text_style.dart';
-import 'package:code_learn/utils/app_spacing.dart';
-import 'package:code_learn/app_constants/colors.dart';
+import 'package:uptrail/utils/app_text_style.dart';
+import 'package:uptrail/utils/app_spacing.dart';
+import 'package:uptrail/app_constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'course_card.dart';
 

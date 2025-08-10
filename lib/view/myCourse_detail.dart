@@ -1,7 +1,7 @@
-import 'package:code_learn/app_constants/colors.dart';
-import 'package:code_learn/utils/app_text_style.dart' show AppTextStyle;
-import 'package:code_learn/view/github.dart';
-import 'package:code_learn/view/video_viewer.dart';
+import 'package:uptrail/app_constants/colors.dart';
+import 'package:uptrail/utils/app_text_style.dart' show AppTextStyle;
+import 'package:uptrail/view/github.dart';
+import 'package:uptrail/view/video_viewer.dart';
 import 'package:flutter/material.dart';
 
 class MycourseDetail extends StatefulWidget {

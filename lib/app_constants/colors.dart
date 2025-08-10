@@ -11,6 +11,17 @@ class AppColors {
   static const Color champagnePink = Color(0xfffceade);
   static const Color coral = Color(0xffff8a5b);
   static const Color brightPinkCrayola = Color(0xffea526f);
+  
+  // Logo-inspired colors (from Uptrail logo)
+  static const Color logoBrightBlue = Color(0xFF229BCE);  // Primary blue from logo
+  static const Color logoGreen = Color(0xFF6FB844);       // Green from logo
+  static const Color logoYellow = Color(0xFFFFE500);      // Bright yellow from logo
+  static const Color logoDarkTeal = Color(0xFF153234);    // Dark teal from logo
+  static const Color logoLightGray = Color(0xFFF9FAF9);   // Light gray from logo
+  
+  // Logo gradient backgrounds
+  static const Color logoTealMid = Color(0xFF1e4a4f);     // Mid teal for gradients
+  static const Color logoTealBlue = Color(0xFF2a6b7a);    // Teal-blue for gradients
 }
 /*
 

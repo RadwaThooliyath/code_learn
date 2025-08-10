@@ -1,10 +1,10 @@
-import 'package:code_learn/app_constants/colors.dart';
-import 'package:code_learn/utils/app_spacing.dart';
-import 'package:code_learn/utils/app_decoration.dart';
-import 'package:code_learn/utils/responsive_helper.dart';
-import 'package:code_learn/utils/customtextformfiled.dart';
-import 'package:code_learn/view/loginPage.dart';
-import 'package:code_learn/view_model/auth_viewModel.dart';
+import 'package:uptrail/app_constants/colors.dart';
+import 'package:uptrail/utils/app_spacing.dart';
+import 'package:uptrail/utils/app_decoration.dart';
+import 'package:uptrail/utils/responsive_helper.dart';
+import 'package:uptrail/utils/customtextformfiled.dart';
+import 'package:uptrail/view/loginPage.dart';
+import 'package:uptrail/view_model/auth_viewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

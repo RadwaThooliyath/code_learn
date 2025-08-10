@@ -1,7 +1,7 @@
-import 'package:code_learn/app_constants/colors.dart';
-import 'package:code_learn/view/homePage.dart';
-import 'package:code_learn/view/my_courses.dart';
-import 'package:code_learn/view/profile.dart';
+import 'package:uptrail/app_constants/colors.dart';
+import 'package:uptrail/view/homePage.dart';
+import 'package:uptrail/view/my_courses.dart';
+import 'package:uptrail/view/profile.dart';
 import 'package:flutter/material.dart';
 
 class Navigpage extends StatefulWidget {

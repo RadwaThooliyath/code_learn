@@ -1,11 +1,11 @@
 {
-    "name": "code_learn",
-    "short_name": "code_learn",
+    "name": "Uptrail",
+    "short_name": "Uptrail",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Uptrail - Learning made simple and accessible.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

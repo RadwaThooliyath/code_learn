@@ -1,7 +1,8 @@
-import 'package:code_learn/view/loginPage.dart';
-import 'package:code_learn/view/navigPage.dart';
-import 'package:code_learn/view/splash_screen.dart';
-import 'package:code_learn/view_model/auth_viewModel.dart';
+import 'package:uptrail/view/loginPage.dart';
+import 'package:uptrail/view/navigPage.dart';
+import 'package:uptrail/view/splash_screen.dart';
+import 'package:uptrail/view_model/auth_viewModel.dart';
+import 'package:uptrail/view_model/course_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,9 +18,10 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthViewModel()),
+        ChangeNotifierProvider(create: (context) => CourseViewModel()),
       ],
       child: MaterialApp(
-        title: 'Code Learn',
+        title: 'Uptrail',
         debugShowCheckedModeBanner: false,
         home: const AuthWrapper(),
       ),

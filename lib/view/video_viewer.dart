@@ -1,4 +1,4 @@
-import 'package:code_learn/app_constants/colors.dart';
+import 'package:uptrail/app_constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class VideoViewer extends StatefulWidget {
