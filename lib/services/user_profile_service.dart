@@ -73,23 +73,19 @@ class UserProfileService {
   }
 
   Future<User?> updateUserProfile({
-    String? firstName,
-    String? lastName,
-    String? phone,
-    String? bio,
-    String? profilePicture,
+    String? name,
+    String? phoneNumber,
+    String? address,
   }) async {
     try {
       final updateData = <String, dynamic>{};
-      if (firstName != null) updateData['first_name'] = firstName;
-      if (lastName != null) updateData['last_name'] = lastName;
-      if (phone != null) updateData['phone'] = phone;
-      if (bio != null) updateData['bio'] = bio;
-      if (profilePicture != null) updateData['profile_picture'] = profilePicture;
+      if (name != null) updateData['name'] = name;
+      if (phoneNumber != null) updateData['phone_number'] = phoneNumber;
+      if (address != null) updateData['address'] = address;
 
       final response = await _makeAuthorizedRequest(() async {
         final headers = await _getAuthHeaders();
-        return http.patch(
+        return http.put(
           Uri.parse(ApiConstants.userProfile),
           headers: headers,
           body: jsonEncode(updateData),
@@ -113,6 +109,7 @@ class UserProfileService {
   Future<bool> changePassword({
     required String currentPassword,
     required String newPassword,
+    required String confirmNewPassword,
   }) async {
     try {
       final response = await _makeAuthorizedRequest(() async {
@@ -123,6 +120,7 @@ class UserProfileService {
           body: jsonEncode({
             'old_password': currentPassword,
             'new_password': newPassword,
+            'new_password_confirm': confirmNewPassword,
           }),
         );
       });

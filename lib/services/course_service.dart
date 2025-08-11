@@ -67,16 +67,33 @@ class CourseService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         
+        List<dynamic> courses;
         if (data is Map && data.containsKey('results')) {
-          return (data['results'] as List)
-              .map((courseJson) => Course.fromJson(courseJson))
-              .toList();
+          courses = data['results'] as List;
         } else if (data is List) {
-          return data.map((courseJson) => Course.fromJson(courseJson)).toList();
+          courses = data;
         } else {
           print("❌ Unexpected response format for courses");
           return [];
         }
+        
+        // Filter courses to show only publicly available ones for students
+        final filteredCourses = courses.where((courseJson) {
+          final course = courseJson as Map<String, dynamic>;
+          final allowPublicEnrollment = course['allow_public_enrollment'] ?? false;
+          
+          if (!allowPublicEnrollment) {
+            print("🔒 Filtered out non-public course: ${course['title']}");
+          }
+          
+          return allowPublicEnrollment;
+        }).toList();
+        
+        print("📚 Showing ${filteredCourses.length}/${courses.length} publicly available courses");
+        
+        return filteredCourses
+            .map((courseJson) => Course.fromJson(courseJson))
+            .toList();
       } else {
         print("❌ Failed to fetch courses: ${response.statusCode}");
         throw Exception('Failed to fetch courses: ${response.statusCode}');

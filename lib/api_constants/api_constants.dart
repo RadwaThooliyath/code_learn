@@ -19,6 +19,15 @@ class ApiConstants {
   static const String courseCategoriesEndpoint = "/categories/";
   static const String enrolledCoursesEndpoint = "/enrolled/";
   
+  // Payment endpoints
+  static const String paymentsBaseUrl = "$baseUrl/payments";
+  static const String myEnrollmentsEndpoint = "/my-enrollments/";
+  static const String purchaseCourseEndpoint = "/purchase-course/";
+  
+  // Team endpoints
+  static const String myTeamsEndpoint = "/my-teams/";
+  static const String teamsEndpoint = "/teams/";
+  
   // Auth URLs
   static String get login => "$authBaseUrl$loginEndpoint";
   static String get register => "$authBaseUrl$registerEndpoint";
@@ -34,6 +43,23 @@ class ApiConstants {
   static String get userProfile => "$usersBaseUrl$profileEndpoint";
   static String get changePassword => "$usersBaseUrl$changePasswordEndpoint";
   
+  // Payment URLs
+  static String get myEnrollments => "$paymentsBaseUrl$myEnrollmentsEndpoint";
+  static String get purchaseCourse => "$paymentsBaseUrl$purchaseCourseEndpoint";
+  
+  // Team URLs
+  static String get myTeams => "$usersBaseUrl$myTeamsEndpoint";
+  static String get teams => "$usersBaseUrl$teamsEndpoint";
+  
   // Course detail URL (requires course ID)
   static String courseDetail(int courseId) => "$coursesBaseUrl/$courseId/";
+  
+  // Payment-specific URLs with parameters
+  static String coursePricing(int courseId) => "$paymentsBaseUrl/course/$courseId/pricing/";
+  static String enrollmentPayments(int enrollmentId) => "$paymentsBaseUrl/enrollments/$enrollmentId/payments/";
+  
+  // Team-specific URLs with parameters
+  static String teamDetail(int teamId) => "$usersBaseUrl$teamsEndpoint$teamId/";
+  static String joinTeam(int teamId) => "$usersBaseUrl$teamsEndpoint$teamId/join/";
+  static String leaveTeam(int teamId) => "$usersBaseUrl$teamsEndpoint$teamId/leave/";
 }

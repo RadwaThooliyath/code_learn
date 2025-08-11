@@ -21,6 +21,9 @@ class Course {
   final DateTime? updatedAt;
   final List<Module>? modules;
   final bool? isEnrolled;
+  final int? moduleCount;
+  final int? totalLessons;
+  final bool? allowPublicEnrollment;
 
   Course({
     required this.id,
@@ -45,6 +48,9 @@ class Course {
     this.updatedAt,
     this.modules,
     this.isEnrolled,
+    this.moduleCount,
+    this.totalLessons,
+    this.allowPublicEnrollment,
   });
 
   factory Course.fromJson(Map<String, dynamic> json) {
@@ -83,6 +89,9 @@ class Course {
               .toList()
           : null,
       isEnrolled: json['is_enrolled'],
+      moduleCount: json['module_count'],
+      totalLessons: json['total_lessons'],
+      allowPublicEnrollment: json['allow_public_enrollment'],
     );
   }
 
@@ -104,6 +113,9 @@ class Course {
       'updated_at': updatedAt?.toIso8601String(),
       'modules': modules?.map((module) => module.toJson()).toList(),
       'is_enrolled': isEnrolled,
+      'module_count': moduleCount,
+      'total_lessons': totalLessons,
+      'allow_public_enrollment': allowPublicEnrollment,
     };
   }
 }

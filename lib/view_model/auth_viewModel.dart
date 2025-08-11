@@ -167,10 +167,9 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<bool> updateProfile({
-    String? firstName,
-    String? lastName,
-    String? phone,
-    String? bio,
+    String? name,
+    String? phoneNumber,
+    String? address,
   }) async {
     if (!isAuthenticated) return false;
     
@@ -179,10 +178,9 @@ class AuthViewModel extends ChangeNotifier {
     
     try {
       final updatedUser = await _profileService.updateUserProfile(
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone,
-        bio: bio,
+        name: name,
+        phoneNumber: phoneNumber,
+        address: address,
       );
       
       if (updatedUser != null) {
@@ -199,9 +197,14 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  void updateUser(User user) {
+    _setUser(user);
+  }
+
   Future<bool> changePassword({
     required String currentPassword,
     required String newPassword,
+    required String confirmNewPassword,
   }) async {
     if (!isAuthenticated) return false;
     
@@ -209,6 +212,7 @@ class AuthViewModel extends ChangeNotifier {
       return await _profileService.changePassword(
         currentPassword: currentPassword,
         newPassword: newPassword,
+        confirmNewPassword: confirmNewPassword,
       );
     } catch (e) {
       print('Error changing password: $e');

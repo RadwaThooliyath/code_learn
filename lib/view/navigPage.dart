@@ -1,6 +1,8 @@
 import 'package:uptrail/app_constants/colors.dart';
 import 'package:uptrail/view/homePage.dart';
 import 'package:uptrail/view/my_courses.dart';
+import 'package:uptrail/view/enrolled_courses.dart';
+import 'package:uptrail/view/my_teams.dart';
 import 'package:uptrail/view/profile.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +19,8 @@ class _NavigpageState extends State<Navigpage> {
   final List<Widget> pages = [
     Homepage(),
     SelectedCoursesPage(),
+    EnrolledCoursesPage(),
+    MyTeamsPage(),
     UserProfilePage()
   ];
 
@@ -48,6 +52,14 @@ class _NavigpageState extends State<Navigpage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.assignment),
               label: "My Courses",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.school),
+              label: "Enrolled",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.group),
+              label: "Teams",
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

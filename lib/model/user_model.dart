@@ -7,6 +7,8 @@ class User {
   final String? firstName;
   final String? lastName;
   final String? phone;
+  final String? phoneNumber;
+  final String? address;
   final String? bio;
   final String? profilePicture;
   final DateTime? dateJoined;
@@ -23,6 +25,8 @@ class User {
     this.firstName,
     this.lastName,
     this.phone,
+    this.phoneNumber,
+    this.address,
     this.bio,
     this.profilePicture,
     this.dateJoined,
@@ -41,6 +45,8 @@ class User {
       firstName: json["first_name"],
       lastName: json["last_name"],
       phone: json["phone"],
+      phoneNumber: json["phone_number"],
+      address: json["address"],
       bio: json["bio"],
       profilePicture: json["profile_picture"] ?? json["avatar"],
       dateJoined: json["date_joined"] != null ? DateTime.parse(json["date_joined"]) : null,
@@ -60,6 +66,8 @@ class User {
       "first_name": firstName,
       "last_name": lastName,
       "phone": phone,
+      "phone_number": phoneNumber,
+      "address": address,
       "bio": bio,
       "profile_picture": profilePicture,
       "date_joined": dateJoined?.toIso8601String(),

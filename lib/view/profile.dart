@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:uptrail/app_constants/colors.dart';
 import 'package:uptrail/view_model/auth_viewModel.dart';
 import 'package:uptrail/view_model/course_viewmodel.dart';
+import 'package:uptrail/view/edit_profile.dart';
 import 'package:provider/provider.dart';
 
 class UserProfilePage extends StatefulWidget {
@@ -59,7 +60,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.white),
             onPressed: () {
-              // TODO: Navigate to edit profile page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EditProfilePage(),
+                ),
+              );
             },
           ),
         ],
@@ -131,8 +137,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     children: [
                       _buildProfileRow("Name", user.name ?? "Not provided", Icons.person),
                       _buildProfileRow("Email", user.email ?? "Not provided", Icons.email),
-                      if (user.phone != null && user.phone!.isNotEmpty)
-                        _buildProfileRow("Phone", user.phone!, Icons.phone),
+                      if ((user.phoneNumber ?? user.phone) != null && (user.phoneNumber ?? user.phone)!.isNotEmpty)
+                        _buildProfileRow("Phone", (user.phoneNumber ?? user.phone)!, Icons.phone),
+                      if (user.address != null && user.address!.isNotEmpty)
+                        _buildProfileRow("Address", user.address!, Icons.location_on),
                       if (user.bio != null && user.bio!.isNotEmpty)
                         _buildProfileRow("Bio", user.bio!, Icons.info_outline),
                       _buildProfileRow("User ID", "#${user.id ?? "N/A"}", Icons.badge),
@@ -214,10 +222,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 Button(
                   text: "Edit Profile", 
                   onPressed: () {
-                    // TODO: Navigate to edit profile page
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Edit profile feature coming soon!'),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditProfilePage(),
                       ),
                     );
                   }
