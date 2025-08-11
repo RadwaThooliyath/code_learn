@@ -40,12 +40,13 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
+
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
               AppColors.robinEggBlue.withValues(alpha: 0.8),
-              AppColors.champagnePink.withValues(alpha: 0.9),
+              AppColors.logoDarkTeal.withValues(alpha: 0.9),
               AppColors.coral.withValues(alpha: 0.7),
             ],
           ),
