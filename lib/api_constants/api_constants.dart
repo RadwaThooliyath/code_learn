@@ -18,6 +18,7 @@ class ApiConstants {
   static const String courseSearchEndpoint = "/search/";
   static const String courseCategoriesEndpoint = "/categories/";
   static const String enrolledCoursesEndpoint = "/enrolled/";
+  static const String enrollCourseEndpoint = "/enroll/";
   
   // Payment endpoints
   static const String paymentsBaseUrl = "$baseUrl/payments";
@@ -38,6 +39,7 @@ class ApiConstants {
   static String get courseSearch => "$coursesBaseUrl$courseSearchEndpoint";
   static String get courseCategories => "$coursesBaseUrl$courseCategoriesEndpoint";
   static String get enrolledCourses => "$coursesBaseUrl$enrolledCoursesEndpoint";
+  static String get enrollCourse => "$coursesBaseUrl$enrollCourseEndpoint";
   
   // Profile URLs
   static String get userProfile => "$usersBaseUrl$profileEndpoint";
@@ -53,6 +55,23 @@ class ApiConstants {
   
   // Course detail URL (requires course ID)
   static String courseDetail(int courseId) => "$coursesBaseUrl/$courseId/";
+
+  // Assignment URLs
+  static String moduleAssignments(int moduleId) => "$coursesBaseUrl/modules/$moduleId/assignments/";
+  static String assignmentDetail(int assignmentId) => "$coursesBaseUrl/assignments/$assignmentId/";
+  static String get assignmentSubmissions => "$coursesBaseUrl/assignment-submissions/";
+  static String assignmentSubmissionDetail(int submissionId) => "$coursesBaseUrl/assignment-submissions/$submissionId/";
+
+  // Quiz URLs
+  static String moduleQuizzes(int moduleId) => "$coursesBaseUrl/modules/$moduleId/quizzes/";
+  static String quizDetail(int quizId) => "$coursesBaseUrl/quizzes/$quizId/";
+  static String startQuizAttempt(int quizId) => "$coursesBaseUrl/quizzes/$quizId/start/";
+  static String get quizAttempts => "$coursesBaseUrl/quiz-attempts/";
+  static String submitQuizAttempt(int attemptId) => "$coursesBaseUrl/quiz-attempts/$attemptId/submit/";
+  
+  // Progress URLs
+  static String get progress => "$coursesBaseUrl/progress/";
+  static String get moduleProgress => "$coursesBaseUrl/module-progress/";
   
   // Payment-specific URLs with parameters
   static String coursePricing(int courseId) => "$paymentsBaseUrl/course/$courseId/pricing/";

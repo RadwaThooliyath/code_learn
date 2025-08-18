@@ -218,7 +218,7 @@ class _TeamDetailPageState extends State<TeamDetailPage>
 
   Widget _buildTeamInfo() {
     return Card(
-      color: AppColors.champagnePink,
+      color: AppColors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -416,7 +416,7 @@ class _TeamDetailPageState extends State<TeamDetailPage>
 
   Widget _buildTeamDescription() {
     return Card(
-      color: AppColors.champagnePink,
+      color: AppColors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

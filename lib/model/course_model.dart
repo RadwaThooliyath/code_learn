@@ -140,18 +140,35 @@ class Module {
   });
 
   factory Module.fromJson(Map<String, dynamic> json) {
+    // Parse lessons from both 'lessons' and 'video_lessons' fields
+    List<Lesson> allLessons = [];
+    
+    // Add regular lessons if they exist
+    if (json['lessons'] != null) {
+      allLessons.addAll(
+        (json['lessons'] as List)
+            .map((lesson) => Lesson.fromJson(lesson))
+            .toList()
+      );
+    }
+    
+    // Add video lessons if they exist, converting them to Lesson objects
+    if (json['video_lessons'] != null) {
+      allLessons.addAll(
+        (json['video_lessons'] as List)
+            .map((videoLesson) => Lesson.fromVideoLessonJson(videoLesson))
+            .toList()
+      );
+    }
+    
     return Module(
       id: json['id'],
       title: json['title'] ?? '',
       description: json['description'],
       order: json['order'] ?? 0,
       lessonCount: json['lesson_count'],
-      lessons: json['lessons'] != null
-          ? (json['lessons'] as List)
-              .map((lesson) => Lesson.fromJson(lesson))
-              .toList()
-          : null,
-      videoLessons: json['video_lessons'],
+      lessons: allLessons.isNotEmpty ? allLessons : null,
+      videoLessons: json['video_lessons'], // Keep raw data for backward compatibility
     );
   }
 
@@ -200,6 +217,20 @@ class Lesson {
       order: json['order'] ?? 0,
       duration: json['duration'],
       isCompleted: json['is_completed'],
+    );
+  }
+
+  factory Lesson.fromVideoLessonJson(Map<String, dynamic> json) {
+    return Lesson(
+      id: json['id'],
+      title: json['title'] ?? '',
+      description: json['description'],
+      type: 'video', // Video lessons are always video type
+      content: json['description'], // Use description as content
+      videoUrl: json['youtube_url'] ?? json['video_url'], // API uses youtube_url
+      order: json['order'] ?? 0,
+      duration: json['duration'],
+      isCompleted: false, // Default to not completed
     );
   }
 

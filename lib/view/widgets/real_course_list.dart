@@ -1,5 +1,5 @@
 import 'package:uptrail/model/course_model.dart';
-import 'package:uptrail/view/course_detail.dart';
+import 'package:uptrail/view/course_detail_page.dart';
 import 'package:uptrail/view_model/course_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

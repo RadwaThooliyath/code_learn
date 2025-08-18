@@ -85,150 +85,183 @@ class _UserProfilePageState extends State<UserProfilePage> {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
             child: Column(
               children: [
-                // Profile Avatar with user initials
-                Center(
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [AppColors.logoBrightBlue, AppColors.logoGreen],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.logoBrightBlue.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        _getUserInitials(user.name ?? "U"),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                
-                // User Info Card
+                // Compact Profile Header
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      width: 1,
-                    ),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                  child: Column(
+                  child: Row(
                     children: [
-                      _buildProfileRow("Name", user.name ?? "Not provided", Icons.person),
-                      _buildProfileRow("Email", user.email ?? "Not provided", Icons.email),
-                      if ((user.phoneNumber ?? user.phone) != null && (user.phoneNumber ?? user.phone)!.isNotEmpty)
-                        _buildProfileRow("Phone", (user.phoneNumber ?? user.phone)!, Icons.phone),
-                      if (user.address != null && user.address!.isNotEmpty)
-                        _buildProfileRow("Address", user.address!, Icons.location_on),
-                      if (user.bio != null && user.bio!.isNotEmpty)
-                        _buildProfileRow("Bio", user.bio!, Icons.info_outline),
-                      _buildProfileRow("User ID", "#${user.id ?? "N/A"}", Icons.badge),
-                      _buildProfileRow("Role", _formatRole(user.role ?? "student"), Icons.work),
-                      if (user.dateJoined != null)
-                        _buildProfileRow("Joined", _formatDate(user.dateJoined!), Icons.calendar_today),
-                      if (user.lastLogin != null)
-                        _buildProfileRow("Last Login", _formatDate(user.lastLogin!), Icons.access_time),
+                      // Avatar
+                      Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [AppColors.logoBrightBlue, AppColors.logoGreen],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getUserInitials(user.name ?? "U"),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // User Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user.name ?? "User",
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              user.email ?? "No email",
+                              style: const TextStyle(
+                                color: Colors.black54,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.logoBrightBlue.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _formatRole(user.role ?? "student"),
+                                style: TextStyle(
+                                  color: AppColors.logoBrightBlue,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 
-                // Course Statistics Card
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      width: 1,
+                // Quick Stats
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildQuickStat("Courses", "${enrolledCourses.length}", Icons.school, Colors.blue),
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildQuickStat("Completed", "0", Icons.check_circle, Colors.green),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildQuickStat("Progress", "${enrolledCourses.length}", Icons.trending_up, Colors.orange),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Account Details
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        "📚 Course Statistics",
+                        "Account Details",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
+                          color: Colors.black87,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      _buildStatRow("Enrolled Courses", "${enrolledCourses.length}", Icons.school),
-                      _buildStatRow("Completed", "0", Icons.check_circle), // TODO: Add completion tracking
-                      _buildStatRow("In Progress", "${enrolledCourses.length}", Icons.play_circle),
-                      if (enrolledCourses.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        const Text(
-                          "Current Courses:",
-                          style: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ...enrolledCourses.take(3).map((course) => 
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2),
-                            child: Text(
-                              "• ${course.title}",
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (enrolledCourses.length > 3)
-                          Text(
-                            "• +${enrolledCourses.length - 3} more courses",
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              fontSize: 13,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                      ],
+                      const SizedBox(height: 12),
+                      if ((user.phoneNumber ?? user.phone) != null)
+                        _buildDetailRow(Icons.phone, "Phone", (user.phoneNumber ?? user.phone)!),
+                      if (user.dateJoined != null)
+                        _buildDetailRow(Icons.calendar_today, "Member since", _formatDate(user.dateJoined!)),
+                      _buildDetailRow(Icons.badge, "User ID", "#${user.id ?? "N/A"}"),
+                      if (user.lastLogin != null)
+                        _buildDetailRow(Icons.access_time, "Last active", _formatDate(user.lastLogin!)),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 40),
-                Button(
-                  text: "Edit Profile", 
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const EditProfilePage(),
+                const SizedBox(height: 16),
+
+                // Settings/Actions
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                    );
-                  }
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildActionRow(Icons.edit, "Edit Profile", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const EditProfilePage()),
+                        );
+                      }),
+                      _buildActionRow(Icons.security, "Privacy & Security", () {}),
+                      _buildActionRow(Icons.help_outline, "Help & Support", () {}),
+                      _buildActionRow(Icons.logout, "Sign Out", () async {
+                        final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+                        await authViewModel.logout();
+                      }, isDestructive: true),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -238,45 +271,46 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Widget _buildProfileRow(String title, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildQuickStat(String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: AppColors.logoBrightBlue.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              color: AppColors.logoBrightBlue,
-              size: 20,
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 2,
-            child: Text(
-              "$title:",
-              style: const TextStyle(
-                color: Colors.white54, 
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+          const SizedBox(height: 2),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 12,
             ),
           ),
         ],
@@ -284,42 +318,68 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Widget _buildStatRow(String title, String value, IconData icon) {
+  Widget _buildDetailRow(IconData icon, String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: AppColors.logoGreen,
-            size: 20,
-          ),
+          Icon(icon, color: Colors.black54, size: 18),
           const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 14,
-              ),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 14,
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.logoGreen.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: AppColors.logoGreen,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionRow(IconData icon, String title, VoidCallback onTap, {bool isDestructive = false}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          child: Row(
+            children: [
+              Icon(
+                icon, 
+                color: isDestructive ? Colors.red : Colors.black54, 
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: isDestructive ? Colors.red : Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: isDestructive ? Colors.red : Colors.black26,
+                size: 18,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

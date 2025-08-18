@@ -212,6 +212,7 @@ class EnrollmentService {
               paymentStatus: enrollment?['payment_status'] ?? 'paid',
               payments: [], // Will be loaded separately
               installments: installments,
+              courseModules: course['modules'], // Capture modules if present
             ));
           } catch (e) {
             print("⚠️ Failed to get payment details for course $courseId: $e");
@@ -235,6 +236,7 @@ class EnrollmentService {
               paymentStatus: 'paid',
               payments: [],
               installments: null,
+              courseModules: course['modules'], // Capture modules if present
             ));
           }
         }
@@ -331,7 +333,14 @@ class EnrollmentService {
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return CoursePricing.fromJson(data);
+        
+        // Check if course_pricing is nested
+        if (data.containsKey('course_pricing')) {
+          return CoursePricing.fromJson(data['course_pricing']);
+        } else {
+          // Fallback for direct structure
+          return CoursePricing.fromJson(data);
+        }
       } else if (response.statusCode == 401) {
         print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
@@ -345,10 +354,11 @@ class EnrollmentService {
     }
   }
 
-  Future<Map<String, dynamic>?> purchaseCourse({
+  Future<Map<String, dynamic>> purchaseCourse({
     required int courseId,
-    String paymentMethod = 'card',
-    int? installmentPlanId,
+    String paymentMethod = 'razorpay',
+    String? transactionId,
+    String? paymentGatewayResponse,
   }) async {
     try {
       final url = Uri.parse(ApiConstants.purchaseCourse);
@@ -357,7 +367,8 @@ class EnrollmentService {
       final body = jsonEncode({
         'course_id': courseId,
         'payment_method': paymentMethod,
-        if (installmentPlanId != null) 'installment_plan_id': installmentPlanId,
+        if (transactionId != null) 'transaction_id': transactionId,
+        if (paymentGatewayResponse != null) 'payment_gateway_response': paymentGatewayResponse,
       });
       
       print("Request Body: $body");
@@ -374,18 +385,48 @@ class EnrollmentService {
       print("Response Body: ${response.body}");
       
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
+        final data = jsonDecode(response.body);
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Course purchased successfully',
+          'enrollment_id': data['enrollment_id'],
+          'payment_id': data['payment_id'],
+          'total_amount': data['total_amount'],
+          'payment_status': data['payment_status'],
+          'data': data,
+        };
+      } else if (response.statusCode == 400) {
+        final errorData = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': errorData['error'] ?? 'Failed to purchase course',
+          'error': errorData,
+        };
+      } else if (response.statusCode == 404) {
+        final errorData = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': errorData['error'] ?? 'Course not found',
+          'error': errorData,
+        };
       } else if (response.statusCode == 401) {
         print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
         print("❌ Failed to purchase course: ${response.statusCode}");
         final errorData = jsonDecode(response.body);
-        throw Exception(errorData['message'] ?? 'Failed to purchase course');
+        return {
+          'success': false,
+          'message': errorData['error'] ?? 'Failed to purchase course',
+          'error': errorData,
+        };
       }
     } catch (e) {
       print("❌ Error purchasing course: $e");
-      throw Exception('Error purchasing course: $e');
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+      };
     }
   }
 
@@ -398,6 +439,88 @@ class EnrollmentService {
     } catch (e) {
       print("❌ Error fetching installment plans: $e");
       return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> enrollInCourse(int courseId) async {
+    try {
+      final url = Uri.parse(ApiConstants.enrollCourse);
+      print("📝 Enrolling in course at: $url");
+      
+      final body = jsonEncode({
+        'course_id': courseId,
+      });
+      
+      print("Request Body: $body");
+      
+      final response = await _makeAuthorizedRequest(() async {
+        return await http.post(
+          url,
+          headers: await _getHeaders(),
+          body: body,
+        );
+      });
+      
+      print("Response Status: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        print("✅ Successfully enrolled in course $courseId");
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Successfully enrolled in course',
+          'data': data,
+        };
+      } else if (response.statusCode == 400) {
+        final errorData = jsonDecode(response.body);
+        final errorMessage = errorData['message'] ?? errorData['error'] ?? 'Enrollment failed';
+        print("⚠️ Enrollment failed: $errorMessage");
+        return {
+          'success': false,
+          'message': errorMessage,
+          'data': errorData,
+        };
+      } else if (response.statusCode == 401) {
+        print("❌ Unauthorized - User not logged in");
+        throw Exception('User not authenticated');
+      } else if (response.statusCode == 403) {
+        print("❌ Forbidden - Course not available for public enrollment");
+        return {
+          'success': false,
+          'message': 'This course is not available for public enrollment',
+        };
+      } else {
+        print("❌ Failed to enroll in course: ${response.statusCode}");
+        final errorData = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': errorData['message'] ?? 'Failed to enroll in course',
+        };
+      }
+    } catch (e) {
+      print("❌ Error enrolling in course: $e");
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> checkEnrollmentEligibility(int courseId) async {
+    try {
+      // For now, we'll check if the course allows public enrollment
+      // In the future, this could be a separate API endpoint
+      return {
+        'eligible': true,
+        'message': 'Course is available for enrollment',
+      };
+    } catch (e) {
+      print("❌ Error checking enrollment eligibility: $e");
+      return {
+        'eligible': false,
+        'message': 'Unable to check enrollment eligibility',
+      };
     }
   }
 }

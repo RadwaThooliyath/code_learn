@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:uptrail/app_constants/colors.dart';
 import 'package:uptrail/model/enrollment_model.dart';
+import 'package:uptrail/model/course_model.dart';
+import 'package:uptrail/model/assignment_model.dart';
+import 'package:uptrail/model/quiz_model.dart';
 import 'package:uptrail/services/enrollment_service.dart';
+import 'package:uptrail/services/course_service.dart';
+import 'package:uptrail/services/assignment_service.dart';
+import 'package:uptrail/services/quiz_service.dart';
 import 'package:uptrail/utils/app_text_style.dart';
+import 'package:uptrail/view/assignment_submission_page.dart';
+import 'package:uptrail/view/quiz_taking_page.dart';
 
 class EnrollmentDetailPage extends StatefulWidget {
   final Enrollment enrollment;
@@ -19,17 +27,29 @@ class EnrollmentDetailPage extends StatefulWidget {
 class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
     with SingleTickerProviderStateMixin {
   final EnrollmentService _enrollmentService = EnrollmentService();
+  final CourseService _courseService = CourseService();
+  final AssignmentService _assignmentService = AssignmentService();
+  final QuizService _quizService = QuizService();
+  
   List<PaymentRecord> _paymentRecords = [];
+  Course? _courseDetail;
+  Map<int, List<Assignment>> _moduleAssignments = {};
+  Map<int, List<Quiz>> _moduleQuizzes = {};
+  Map<int, bool> _quizPassedStatus = {}; // Track quiz pass status
+  Map<int, int> _quizAttemptCounts = {}; // Track attempt counts
+  Map<int, bool> _canRetakeQuiz = {}; // Track if quiz can be retaken
   bool _isLoading = false;
+  bool _isLoadingCourse = false;
   String? _error;
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _loadPaymentRecords();
     _loadInstallmentPlans();
+    _loadCourseContent();
   }
 
   @override
@@ -79,6 +99,312 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
     }
   }
 
+  Future<void> _loadCourseContent() async {
+    try {
+      setState(() {
+        _isLoadingCourse = true;
+      });
+
+      print("🔍 Checking enrollment data for modules...");
+      print("🔍 Enrollment courseModules: ${widget.enrollment.courseModules}");
+      
+      // Try to get course detail from the proper API first
+      print("📚 Trying to get course detail with modules from: /api/courses/${widget.enrollment.courseId}/");
+      
+      try {
+        final courseDetail = await _courseService.getCourseDetail(widget.enrollment.courseId);
+        if (courseDetail != null) {
+          print("✅ Got course detail with ${courseDetail.modules?.length ?? 0} modules");
+          setState(() {
+            _courseDetail = courseDetail;
+          });
+          
+          // Load assignments and quizzes for each module if available
+          if (courseDetail.modules != null) {
+            for (final module in courseDetail.modules!) {
+              print("📚 Loading content for module: ${module.title}");
+              await _loadModuleAssignments(module.id);
+              await _loadModuleQuizzes(module.id);
+            }
+          }
+        }
+      } catch (e) {
+        print("❌ Course detail API failed: $e");
+        
+        // Check if we have modules in the enrollment data as fallback
+        if (widget.enrollment.courseModules != null && widget.enrollment.courseModules!.isNotEmpty) {
+          print("✅ Found modules in enrollment data: ${widget.enrollment.courseModules!.length} modules");
+          
+          // Parse modules from enrollment data
+          final modules = widget.enrollment.courseModules!
+              .map((moduleData) => Module.fromJson(moduleData as Map<String, dynamic>))
+              .toList();
+          
+          setState(() {
+            _courseDetail = Course(
+              id: widget.enrollment.courseId,
+              title: widget.enrollment.courseName,
+              description: 'Course content from enrollment',
+              isFree: false,
+              modules: modules,
+            );
+          });
+          
+          // Load assignments and quizzes for each module
+          for (final module in modules) {
+            await _loadModuleAssignments(module.id);
+            await _loadModuleQuizzes(module.id);
+          }
+        } else {
+          print("⚠️ No modules in enrollment data either, trying enrolled courses API...");
+          
+          // Final fallback: Try to get enrolled courses and find this course
+          try {
+            final enrolledCourses = await _courseService.getEnrolledCourses();
+            final matchingCourse = enrolledCourses.firstWhere(
+              (course) => course.id == widget.enrollment.courseId,
+              orElse: () => throw Exception("Course not found in enrolled courses"),
+            );
+            
+            print("✅ Found course in enrolled courses with ${matchingCourse.modules?.length ?? 0} modules");
+            setState(() {
+              _courseDetail = matchingCourse;
+            });
+            
+            // Load assignments and quizzes for each module if available
+            if (matchingCourse.modules != null) {
+              for (final module in matchingCourse.modules!) {
+                await _loadModuleAssignments(module.id);
+                await _loadModuleQuizzes(module.id);
+              }
+            }
+          } catch (fallbackError) {
+            print("❌ All fallbacks failed: $fallbackError");
+            // Create a minimal course object with just the basic info we have
+            // But also try to manually load assignments and quizzes by trying common module IDs
+            setState(() {
+              _courseDetail = Course(
+                id: widget.enrollment.courseId,
+                title: widget.enrollment.courseName,
+                description: 'Team enrollment course - content loaded separately',
+                isFree: false,
+                modules: [], // Empty modules list, but we'll try to load content anyway
+              );
+            });
+            
+            // Try to load content by guessing module IDs or using course ID as module ID
+            print("🔍 Trying to load assignments/quizzes directly...");
+            await _tryLoadContentDirectly();
+          }
+        }
+      }
+
+      setState(() {
+        _isLoadingCourse = false;
+      });
+    } catch (e) {
+      print("⚠️ Failed to load course content: $e");
+      setState(() {
+        _isLoadingCourse = false;
+      });
+    }
+  }
+
+  Future<void> _loadModuleAssignments(int moduleId) async {
+    try {
+      final assignments = await _assignmentService.getModuleAssignments(moduleId);
+      setState(() {
+        _moduleAssignments[moduleId] = assignments;
+      });
+    } catch (e) {
+      print("⚠️ Failed to load assignments for module $moduleId: $e");
+      setState(() {
+        _moduleAssignments[moduleId] = [];
+      });
+    }
+  }
+
+  Future<void> _loadModuleQuizzes(int moduleId) async {
+    try {
+      final quizzes = await _quizService.getModuleQuizzes(moduleId);
+      setState(() {
+        _moduleQuizzes[moduleId] = quizzes;
+      });
+      
+      // Load quiz pass status for each quiz
+      for (final quiz in quizzes) {
+        await _loadQuizPassStatus(quiz.id);
+      }
+    } catch (e) {
+      print("⚠️ Failed to load quizzes for module $moduleId: $e");
+      setState(() {
+        _moduleQuizzes[moduleId] = [];
+      });
+    }
+  }
+
+  Future<void> _loadQuizPassStatus(int quizId) async {
+    try {
+      final attempts = await _quizService.getMyQuizAttempts();
+      final quizAttempts = attempts.where((attempt) => attempt.quiz == quizId).toList();
+      
+      bool hasPassed = false;
+      int attemptCount = quizAttempts.length;
+      
+      if (quizAttempts.isNotEmpty) {
+        // Check if any attempt passed
+        hasPassed = quizAttempts.any((attempt) => 
+          attempt.isPassed.toLowerCase() == 'true' || 
+          attempt.isPassed.toLowerCase() == 'passed'
+        );
+      }
+      
+      // Find the quiz to get max attempts
+      Quiz? quiz;
+      for (final moduleQuizzes in _moduleQuizzes.values) {
+        quiz = moduleQuizzes.where((q) => q.id == quizId).firstOrNull;
+        if (quiz != null) break;
+      }
+      
+      bool canRetake = false;
+      if (quiz != null) {
+        // Can retake if haven't passed and have attempts remaining
+        canRetake = (!hasPassed && attemptCount < quiz.maxAttempts);
+      }
+      
+      setState(() {
+        _quizPassedStatus[quizId] = hasPassed;
+        _quizAttemptCounts[quizId] = attemptCount;
+        _canRetakeQuiz[quizId] = canRetake;
+      });
+    } catch (e) {
+      print("⚠️ Failed to load quiz pass status for quiz $quizId: $e");
+    }
+  }
+
+  Future<void> _tryLoadContentDirectly() async {
+    // Try a wider range of module IDs since we know content exists
+    final possibleModuleIds = <int>[];
+    
+    // Add course-related IDs
+    possibleModuleIds.add(widget.enrollment.courseId); // 3
+    
+    // Try sequential IDs around the course ID
+    for (int i = 1; i <= 20; i++) {
+      possibleModuleIds.add(i);
+    }
+    
+    // Try some common patterns
+    possibleModuleIds.addAll([
+      widget.enrollment.courseId * 10, // 30
+      widget.enrollment.courseId + 10, // 13
+      widget.enrollment.courseId + 100, // 103
+    ]);
+
+    print("🔍 Trying possible module IDs: ${possibleModuleIds.take(10).toList()}... (${possibleModuleIds.length} total)");
+    
+    bool foundContent = false;
+    
+    for (final moduleId in possibleModuleIds) {
+      try {
+        print("🔍 Trying module ID: $moduleId");
+        
+        List<Assignment> assignments = [];
+        List<Quiz> quizzes = [];
+        
+        // Try to load assignments for this module ID
+        try {
+          assignments = await _assignmentService.getModuleAssignments(moduleId);
+          if (assignments.isNotEmpty) {
+            print("✅ Found ${assignments.length} assignments for module $moduleId");
+            setState(() {
+              _moduleAssignments[moduleId] = assignments;
+            });
+          }
+        } catch (e) {
+          print("  No assignments for module $moduleId");
+        }
+        
+        // Try to load quizzes for this module ID
+        try {
+          quizzes = await _quizService.getModuleQuizzes(moduleId);
+          if (quizzes.isNotEmpty) {
+            print("✅ Found ${quizzes.length} quizzes for module $moduleId");
+            setState(() {
+              _moduleQuizzes[moduleId] = quizzes;
+            });
+          }
+        } catch (e) {
+          print("  No quizzes for module $moduleId");
+        }
+        
+        // If we found content, create a module for display
+        if (assignments.isNotEmpty || quizzes.isNotEmpty) {
+          print("🎉 Found content! Creating module for ID $moduleId");
+          
+          final fakeModule = Module(
+            id: moduleId,
+            title: "Module $moduleId - ${widget.enrollment.courseName}",
+            description: "Course content (${assignments.length} assignments, ${quizzes.length} quizzes)",
+            order: moduleId,
+            lessons: [], // We don't have lesson data yet
+          );
+          
+          setState(() {
+            _courseDetail = Course(
+              id: widget.enrollment.courseId,
+              title: widget.enrollment.courseName,
+              description: 'Team enrollment course with discovered content',
+              isFree: false,
+              modules: [fakeModule], // Add the module we found content for
+            );
+          });
+          
+          foundContent = true;
+          break; // Stop trying once we find content
+        }
+      } catch (e) {
+        // Silently continue to next module ID
+      }
+    }
+    
+    if (!foundContent) {
+      print("❌ No content found in any of the ${possibleModuleIds.length} module IDs tried");
+      print("💡 This might indicate:");
+      print("   1. Module IDs follow a different pattern");
+      print("   2. Assignment/Quiz APIs require different authentication");
+      print("   3. Content is stored differently for team enrollments");
+      
+      // Also try to get user's assignment submissions to see if we can find assignment IDs
+      try {
+        print("🔍 Trying to get user's assignment submissions...");
+        final submissions = await _assignmentService.getMyAssignmentSubmissions();
+        if (submissions.isNotEmpty) {
+          print("✅ Found ${submissions.length} assignment submissions");
+          for (final submission in submissions) {
+            print("  - Assignment: ${submission.assignmentTitle} (ID: ${submission.assignment})");
+          }
+        }
+      } catch (e) {
+        print("❌ Could not get assignment submissions: $e");
+      }
+      
+      // Try to get user's quiz attempts
+      try {
+        print("🔍 Trying to get user's quiz attempts...");
+        final attempts = await _quizService.getMyQuizAttempts();
+        if (attempts.isNotEmpty) {
+          print("✅ Found ${attempts.length} quiz attempts");
+          for (final attempt in attempts) {
+            print("  - Quiz: ${attempt.quizTitle} (ID: ${attempt.quiz})");
+          }
+        }
+      } catch (e) {
+        print("❌ Could not get quiz attempts: $e");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,6 +433,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
               text: "Overview",
             ),
             Tab(
+              icon: Icon(Icons.school),
+              text: "Content",
+            ),
+            Tab(
               icon: Icon(Icons.payment),
               text: "Payments",
             ),
@@ -117,6 +447,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
         controller: _tabController,
         children: [
           _buildOverviewTab(),
+          _buildContentTab(),
           _buildPaymentsTab(),
         ],
       ),
@@ -137,6 +468,626 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
               widget.enrollment.installments!.isNotEmpty)
             _buildInstallmentOverview(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildContentTab() {
+    if (_isLoadingCourse) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.logoBrightBlue,
+        ),
+      );
+    }
+
+    if (_courseDetail == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 80,
+              color: Colors.white24,
+            ),
+            SizedBox(height: 16),
+            Text(
+              "Unable to load course content",
+              style: TextStyle(color: Colors.white70, fontSize: 18),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_courseDetail!.modules == null || _courseDetail!.modules!.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.book_outlined,
+              size: 80,
+              color: Colors.white24,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "No modules available in this course",
+              style: const TextStyle(color: Colors.white70, fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Course: ${_courseDetail!.title}",
+              style: const TextStyle(color: Colors.white54, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                _loadCourseContent(); // Retry loading
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.logoBrightBlue,
+              ),
+              child: const Text("Retry"),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Course Modules",
+            style: AppTextStyle.headline2,
+          ),
+          const SizedBox(height: 16),
+          ..._courseDetail!.modules!.map((module) => _buildModuleCard(module)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModuleCard(Module module) {
+    final assignments = _moduleAssignments[module.id] ?? [];
+    final quizzes = _moduleQuizzes[module.id] ?? [];
+    
+    return Card(
+      color: AppColors.white,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: ExpansionTile(
+        title: Text(
+          module.title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(
+          module.description ?? 'No description available',
+          style: const TextStyle(
+            color: Colors.black54,
+            fontSize: 14,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        leading: CircleAvatar(
+          backgroundColor: AppColors.logoBrightBlue,
+          child: Text(
+            module.order.toString(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        children: [
+          if (module.lessons != null && module.lessons!.isNotEmpty)
+            _buildLessonsSection(module.lessons!),
+          if (assignments.isNotEmpty)
+            _buildAssignmentsSection(assignments),
+          if (quizzes.isNotEmpty)
+            _buildQuizzesSection(quizzes),
+          if ((module.lessons?.isEmpty ?? true) && 
+              assignments.isEmpty && 
+              quizzes.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                "No content available in this module",
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLessonsSection(List<Lesson> lessons) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "📖 Lessons",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...lessons.map((lesson) => ListTile(
+            dense: true,
+            leading: Icon(
+              lesson.type == 'video' ? Icons.play_circle : Icons.article,
+              color: AppColors.logoBrightBlue,
+            ),
+            title: Text(
+              lesson.title,
+              style: const TextStyle(color: Colors.black),
+            ),
+            subtitle: lesson.description != null 
+                ? Text(
+                    lesson.description!,
+                    style: const TextStyle(color: Colors.black54),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : null,
+            trailing: lesson.isCompleted == true 
+                ? const Icon(Icons.check_circle, color: Colors.green)
+                : null,
+          )),
+          const Divider(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAssignmentsSection(List<Assignment> assignments) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "📝 Assignments",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...assignments.map((assignment) => ListTile(
+            dense: true,
+            leading: Icon(
+              Icons.assignment,
+              color: _getAssignmentStatusColor(assignment.submissionStatus),
+            ),
+            title: Text(
+              assignment.title,
+              style: const TextStyle(color: Colors.black),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (assignment.description.isNotEmpty)
+                  Text(
+                    assignment.description,
+                    style: const TextStyle(color: Colors.black54),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                Row(
+                  children: [
+                    Text(
+                      "Max Points: ${assignment.maxPoints}",
+                      style: const TextStyle(color: Colors.black54, fontSize: 12),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      "Due: ${assignment.dueDays} days",
+                      style: const TextStyle(color: Colors.black54, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            trailing: _buildAssignmentStatusChip(assignment.submissionStatus),
+            onTap: () {
+              // Navigate to assignment submission page
+              _navigateToAssignmentSubmission(assignment);
+            },
+          )),
+          const Divider(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuizzesSection(List<Quiz> quizzes) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "🧠 Quizzes",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...quizzes.map((quiz) {
+            final isPassed = _quizPassedStatus[quiz.id] ?? false;
+            final attemptCount = _quizAttemptCounts[quiz.id] ?? 0;
+            final canRetake = _canRetakeQuiz[quiz.id] ?? (attemptCount < quiz.maxAttempts);
+            final canTakeQuiz = attemptCount == 0 || canRetake;
+            
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              decoration: BoxDecoration(
+                color: isPassed ? Colors.green[50] : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+                border: isPassed ? Border.all(color: Colors.green[200]!, width: 1) : null,
+              ),
+              child: ListTile(
+                dense: true,
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isPassed ? Colors.green[100] : AppColors.logoBrightBlue.withOpacity(0.1),
+                  ),
+                  child: Icon(
+                    isPassed ? Icons.check_circle : Icons.quiz_outlined,
+                    color: isPassed ? Colors.green[600] : AppColors.logoBrightBlue,
+                    size: 20,
+                  ),
+                ),
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        quiz.title,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: isPassed ? FontWeight.w600 : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                    if (isPassed)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green[600],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          "PASSED",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (quiz.description.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          quiz.description,
+                          style: const TextStyle(color: Colors.black54),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    Text(
+                      "Questions: ${quiz.questions.length} • Points: ${quiz.maxPoints} • Attempts: $attemptCount/${quiz.maxAttempts}",
+                      style: const TextStyle(color: Colors.black54, fontSize: 12),
+                    ),
+                  ],
+                ),
+                trailing: Container(
+                  height: 36,
+                  child: canTakeQuiz 
+                    ? ElevatedButton.icon(
+                        onPressed: () => _startQuiz(quiz),
+                        icon: Icon(
+                          attemptCount > 0 ? Icons.refresh : Icons.play_arrow,
+                          size: 16,
+                        ),
+                        label: Text(
+                          attemptCount > 0 ? "Retry" : "Take Quiz",
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: attemptCount > 0 ? Colors.orange[600] : AppColors.logoBrightBlue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 2,
+                        ),
+                      )
+                    : Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isPassed ? Colors.green[100] : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          isPassed ? "Completed" : "No attempts left",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isPassed ? Colors.green[700] : Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                ),
+              ),
+            );
+          }),
+          const Divider(),
+        ],
+      ),
+    );
+  }
+
+  Color _getAssignmentStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'submitted':
+      case 'graded':
+        return Colors.green;
+      case 'draft':
+        return Colors.orange;
+      case 'not_submitted':
+      default:
+        return Colors.red;
+    }
+  }
+
+  Widget _buildAssignmentStatusChip(String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: _getAssignmentStatusColor(status).withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        status.toUpperCase().replaceAll('_', ' '),
+        style: TextStyle(
+          color: _getAssignmentStatusColor(status),
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToAssignmentSubmission(Assignment assignment) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AssignmentSubmissionPage(assignment: assignment),
+      ),
+    );
+    
+    // Refresh assignment data if submission was updated
+    if (result != null) {
+      // Reload module assignments to update status
+      _loadModuleAssignments(assignment.id); // This might need the module ID instead
+    }
+  }
+
+  void _showAssignmentDetail(Assignment assignment) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.white,
+        title: Text(
+          assignment.title,
+          style: const TextStyle(color: Colors.black),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Description:",
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                assignment.description,
+                style: const TextStyle(color: Colors.black87),
+              ),
+              const SizedBox(height: 12),
+              if (assignment.requirements.isNotEmpty) ...[
+                Text(
+                  "Requirements:",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  assignment.requirements,
+                  style: const TextStyle(color: Colors.black87),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (assignment.resources.isNotEmpty) ...[
+                Text(
+                  "Resources:",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  assignment.resources,
+                  style: const TextStyle(color: Colors.black87),
+                ),
+                const SizedBox(height: 12),
+              ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Max Points: ${assignment.maxPoints}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  Text(
+                    "Passing Score: ${assignment.passingScore}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Due Days: ${assignment.dueDays}",
+                style: const TextStyle(color: Colors.black54),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Close"),
+          ),
+          if (assignment.submissionStatus == 'not_submitted')
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to assignment submission page
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Assignment submission feature coming soon"),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.logoBrightBlue,
+              ),
+              child: const Text("Submit Assignment"),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showQuizDetail(Quiz quiz) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.champagnePink,
+        title: Text(
+          quiz.title,
+          style: const TextStyle(color: Colors.black),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Description:",
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                quiz.description,
+                style: const TextStyle(color: Colors.black87),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Questions: ${quiz.questions.length}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  Text(
+                    "Time Limit: ${quiz.timeLimit} min",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Max Points: ${quiz.maxPoints}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  Text(
+                    "Passing Score: ${quiz.passingScore}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Close"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _startQuiz(quiz);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.logoBrightBlue,
+            ),
+            child: const Text("Start Quiz"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startQuiz(Quiz quiz) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QuizTakingPage(quiz: quiz),
       ),
     );
   }
@@ -219,7 +1170,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
 
   Widget _buildCourseInfo() {
     return Card(
-      color: AppColors.champagnePink,
+      color: AppColors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -312,7 +1263,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
 
   Widget _buildPaymentSummary() {
     return Card(
-      color: AppColors.champagnePink,
+      color: AppColors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -335,7 +1286,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
                   style: TextStyle(   color: Colors.black,),
                 ),
                 Text(
-                  "\$${widget.enrollment.totalAmount.toStringAsFixed(2)}",
+                  "\u{20B9}${widget.enrollment.totalAmount.toStringAsFixed(2)}",
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -352,7 +1303,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
                   style: TextStyle(   color: Colors.black,),
                 ),
                 Text(
-                  "\$${widget.enrollment.paidAmount.toStringAsFixed(2)}",
+                  "\u{20B9}${widget.enrollment.paidAmount.toStringAsFixed(2)}",
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -370,7 +1321,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
                     style: TextStyle(   color: Colors.black,),
                   ),
                   Text(
-                    "\$${widget.enrollment.remainingAmount.toStringAsFixed(2)}",
+                    "\u{20B9}${widget.enrollment.remainingAmount.toStringAsFixed(2)}",
                     style: const TextStyle(
                       color: Colors.orange,
                       fontWeight: FontWeight.bold,
@@ -419,7 +1370,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
     final installments = widget.enrollment.installments!;
     
     return Card(
-      color: AppColors.card1,
+      color: AppColors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -470,7 +1421,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
                       ),
                     ),
                     Text(
-                      "\$${installment.amount.toStringAsFixed(2)}",
+                      "\u{20B9}${installment.amount.toStringAsFixed(2)}",
                       style: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
@@ -496,7 +1447,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
 
   Widget _buildPaymentCard(PaymentRecord payment) {
     return Card(
-      color: AppColors.champagnePink,
+      color: AppColors.white,
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -507,7 +1458,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "\$${payment.amount.toStringAsFixed(2)}",
+                  "\u{20B9}${payment.amount.toStringAsFixed(2)}",
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 18,

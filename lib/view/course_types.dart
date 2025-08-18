@@ -1,5 +1,5 @@
 import 'package:uptrail/app_constants/colors.dart';
-import 'package:uptrail/view/course_detail.dart';
+import 'package:uptrail/view/course_detail_page.dart';
 import 'package:uptrail/view/course_search.dart';
 import 'package:uptrail/view_model/course_viewmodel.dart';
 import 'package:flutter/material.dart';

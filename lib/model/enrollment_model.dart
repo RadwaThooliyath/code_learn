@@ -11,6 +11,7 @@ class Enrollment {
   final String paymentStatus;
   final List<PaymentRecord> payments;
   final List<Installment>? installments;
+  final List<dynamic>? courseModules; // Store raw module data from API
 
   Enrollment({
     required this.id,
@@ -25,15 +26,16 @@ class Enrollment {
     required this.paymentStatus,
     required this.payments,
     this.installments,
+    this.courseModules,
   });
 
   factory Enrollment.fromJson(Map<String, dynamic> json) {
     return Enrollment(
       id: json['id'],
       courseId: json['course_id'] ?? json['course']?['id'],
-      courseName: json['course_name'] ?? json['course']?['title'] ?? '',
-      courseImage: json['course_image'] ?? json['course']?['image'],
-      enrolledAt: DateTime.parse(json['enrolled_at']),
+      courseName: json['course_name'] ?? json['course']?['title'] ?? json['title'] ?? '',
+      courseImage: json['course_image'] ?? json['course']?['image'] ?? json['thumbnail_url'] ?? json['thumbnail'],
+      enrolledAt: DateTime.parse(json['enrolled_at'] ?? json['created_at']),
       status: json['status'] ?? 'active',
       totalAmount: double.parse(json['total_amount']?.toString() ?? '0'),
       paidAmount: double.parse(json['paid_amount']?.toString() ?? '0'),
@@ -47,6 +49,7 @@ class Enrollment {
               .map((installment) => Installment.fromJson(installment))
               .toList()
           : null,
+      courseModules: json['modules'] ?? json['course']?['modules'], // Extract modules if present
     );
   }
 
@@ -64,6 +67,7 @@ class Enrollment {
       'payment_status': paymentStatus,
       'payments': payments.map((p) => p.toJson()).toList(),
       'installments': installments?.map((i) => i.toJson()).toList(),
+      'course_modules': courseModules,
     };
   }
 }
@@ -171,37 +175,63 @@ class Installment {
 }
 
 class CoursePricing {
-  final int courseId;
-  final double price;
-  final double? discountPrice;
-  final String currency;
-  final bool installmentsAvailable;
-  final List<InstallmentPlan>? installmentPlans;
+  final int id;
+  final String title;
+  final String basePrice;
+  final String taxRate;
+  final String taxAmount;
+  final String totalAmount;
+  final bool isFree;
+  final bool allowPublicEnrollment;
 
   CoursePricing({
-    required this.courseId,
-    required this.price,
-    this.discountPrice,
-    required this.currency,
-    required this.installmentsAvailable,
-    this.installmentPlans,
+    required this.id,
+    required this.title,
+    required this.basePrice,
+    required this.taxRate,
+    required this.taxAmount,
+    required this.totalAmount,
+    required this.isFree,
+    required this.allowPublicEnrollment,
   });
 
   factory CoursePricing.fromJson(Map<String, dynamic> json) {
     return CoursePricing(
-      courseId: json['course_id'],
-      price: double.parse(json['price']?.toString() ?? '0'),
-      discountPrice: json['discount_price'] != null 
-          ? double.parse(json['discount_price'].toString())
-          : null,
-      currency: json['currency'] ?? 'USD',
-      installmentsAvailable: json['installments_available'] ?? false,
-      installmentPlans: json['installment_plans'] != null
-          ? (json['installment_plans'] as List<dynamic>)
-              .map((plan) => InstallmentPlan.fromJson(plan))
-              .toList()
-          : null,
+      id: json['id'] ?? 0,
+      title: json['title'] ?? '',
+      basePrice: json['base_price']?.toString() ?? '0',
+      taxRate: json['tax_rate']?.toString() ?? '0',
+      taxAmount: json['tax_amount']?.toString() ?? '0',
+      totalAmount: json['total_amount']?.toString() ?? '0',
+      isFree: json['is_free'] ?? false,
+      allowPublicEnrollment: json['allow_public_enrollment'] ?? false,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'base_price': basePrice,
+      'tax_rate': taxRate,
+      'tax_amount': taxAmount,
+      'total_amount': totalAmount,
+      'is_free': isFree,
+      'allow_public_enrollment': allowPublicEnrollment,
+    };
+  }
+
+  // Helper methods
+  double get totalAmountAsDouble {
+    return double.tryParse(totalAmount) ?? 0.0;
+  }
+
+  double get baseAmountAsDouble {
+    return double.tryParse(basePrice) ?? 0.0;
+  }
+
+  double get taxAmountAsDouble {
+    return double.tryParse(taxAmount) ?? 0.0;
   }
 }
 

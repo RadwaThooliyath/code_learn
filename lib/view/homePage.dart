@@ -1,6 +1,5 @@
 import 'package:uptrail/utils/app_spacing.dart';
 import 'package:uptrail/utils/app_decoration.dart';
-import 'package:uptrail/utils/responsive_helper.dart';
 import 'package:uptrail/view/course_types.dart';
 import 'package:uptrail/view/course_search.dart';
 import 'package:uptrail/view_model/auth_viewModel.dart';
@@ -106,76 +105,15 @@ class _HomepageState extends State<Homepage> {
                               },
                               padding: const EdgeInsets.all(8),
                             ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: Stack(
-                                children: [
-                                  const Icon(
-                                    Icons.notifications_outlined,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.coral,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              onPressed: () {},
-                              padding: const EdgeInsets.all(8),
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.logout,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                              onPressed: () async {
-                                final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-                                
-                                // Show confirmation dialog
-                                final shouldLogout = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Logout'),
-                                    content: const Text('Are you sure you want to logout?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(true),
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: Colors.red,
-                                        ),
-                                        child: const Text('Logout'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-
-                                if (shouldLogout == true) {
-                                  await authViewModel.logout();
-                                  // Navigation will be handled automatically by AuthWrapper
-                                }
-                              },
-                              padding: const EdgeInsets.all(8),
-                            ),
                             const SizedBox(width: 4),
                             Consumer<AuthViewModel>(
                               builder: (context, authViewModel, child) {
                                 return GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    // Navigate to profile page (Profile tab)
+                                    // Since we're in a tabbed navigation, we need to use the parent navigator
+                                    DefaultTabController.of(context).animateTo(4); // Profile is typically the 4th tab (index 3)
+                                  },
                                   child: Container(
                                     width: 32,
                                     height: 32,
@@ -244,60 +182,15 @@ class _HomepageState extends State<Homepage> {
                 child: Container(
                   color: AppColors.background,
                   child: Padding(
-                    padding: ResponsiveHelper.getScreenPadding(context),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                      // Quick Stats Section
-                      Consumer<CourseViewModel>(
-                        builder: (context, courseViewModel, child) {
-                          final totalCourses = courseViewModel.courses.length;
-                          final enrolledCourses = courseViewModel.enrolledCourses.length;
-                          
-                          // Calculate total hours from available courses
-                          final totalHours = courseViewModel.courses.fold<int>(0, (sum, course) {
-                            return sum + (course.duration ?? 0);
-                          });
-                          
-                          // Calculate progress percentage
-                          final progressPercentage = totalCourses > 0 
-                              ? ((enrolledCourses / totalCourses) * 100).round()
-                              : 0;
-                          
-                          return Container(
-                            padding: AppSpacing.paddingL,
-                            decoration: AppDecoration.cardDecoration,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                _buildStatItem(
-                                  totalCourses.toString(), 
-                                  "Courses", 
-                                  Icons.book_outlined
-                                ),
-                                _buildStatDivider(),
-                                _buildStatItem(
-                                  totalHours > 0 ? "${totalHours}h" : "0h", 
-                                  "Hours", 
-                                  Icons.access_time_outlined
-                                ),
-                                _buildStatDivider(),
-                                _buildStatItem(
-                                  "$progressPercentage%", 
-                                  "Progress", 
-                                  Icons.trending_up_outlined
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      AppSpacing.large,
                       // All Courses
                       Consumer<CourseViewModel>(
                         builder: (context, courseViewModel, child) {
                           return RealCourseList(
-                            title: "📚 Available Courses",
+                            title: "Available Courses",
                             courses: courseViewModel.courses,
                             isLoading: courseViewModel.isLoading,
                             onSeeAll: () {
@@ -316,46 +209,48 @@ class _HomepageState extends State<Homepage> {
                       Consumer<CourseViewModel>(
                         builder: (context, courseViewModel, child) {
                           if (courseViewModel.isLoadingCategories) {
-                            return Container(
-                              padding: AppSpacing.paddingL,
-                              decoration: AppDecoration.cardDecoration,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "🏷️ Course Categories",
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: const Text(
+                                    "Course Categories",
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.background,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                  AppSpacing.medium,
-                                  const Center(
+                                ),
+                                AppSpacing.medium,
+                                Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                                  padding: AppSpacing.paddingL,
+                                  decoration: AppDecoration.cardDecoration,
+                                  child: const Center(
                                     child: CircularProgressIndicator(),
                                   ),
-                                  AppSpacing.medium,
-                                ],
-                              ),
+                                ),
+                              ],
                             );
                           }
                           
                           if (courseViewModel.categories.isNotEmpty) {
-                            return Container(
-                              padding: AppSpacing.paddingL,
-                              decoration: AppDecoration.cardDecoration,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       const Text(
-                                        "🏷️ Course Categories",
+                                        "Course Categories",
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
-                                          color: AppColors.background,
+                                          color: Colors.white,
                                         ),
                                       ),
                                       GestureDetector(
@@ -378,24 +273,25 @@ class _HomepageState extends State<Homepage> {
                                       ),
                                     ],
                                   ),
-                                  AppSpacing.medium,
-                                  SizedBox(
-                                    height: 130,
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: courseViewModel.categories.take(6).length,
-                                      itemBuilder: (context, index) {
-                                        final category = courseViewModel.categories[index];
-                                        return Container(
-                                          width: 140,
-                                          margin: EdgeInsets.only(right: index < courseViewModel.categories.take(6).length - 1 ? 12 : 0),
-                                          child: _buildCategoryCard(context, category, index),
-                                        );
-                                      },
-                                    ),
+                                ),
+                                AppSpacing.medium,
+                                SizedBox(
+                                  height: 130,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    itemCount: courseViewModel.categories.take(6).length,
+                                    itemBuilder: (context, index) {
+                                      final category = courseViewModel.categories[index];
+                                      return Container(
+                                        width: 140,
+                                        margin: EdgeInsets.only(right: index < courseViewModel.categories.take(6).length - 1 ? 12 : 0),
+                                        child: _buildCategoryCard(context, category, index),
+                                      );
+                                    },
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             );
                           }
                           
@@ -408,7 +304,7 @@ class _HomepageState extends State<Homepage> {
                         builder: (context, courseViewModel, child) {
                           final freeCourses = courseViewModel.courses.where((course) => course.isFree).toList();
                           return RealCourseList(
-                            title: "🆓 Free Courses",
+                            title: "Free Courses",
                             courses: freeCourses,
                             isLoading: courseViewModel.isLoading,
                             onSeeAll: () async {
@@ -438,47 +334,6 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Widget _buildStatItem(String value, String label, IconData icon) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.robinEggBlue, AppColors.coral],
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: Colors.white, size: 24),
-        ),
-        AppSpacing.verySmall,
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.background,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatDivider() {
-    return Container(
-      height: 40,
-      width: 1,
-      color: Colors.grey[300],
-    );
-  }
 
   List<Color> _getGradientColors(int index) {
     final gradients = [
