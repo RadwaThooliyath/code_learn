@@ -60,7 +60,7 @@ class AppDecoration {
   // Box shadows
   static List<BoxShadow> get softShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.08),
+      color: Colors.black.withValues(alpha: 0.08),
       blurRadius: 10,
       offset: const Offset(0, 4),
     ),
@@ -93,8 +93,8 @@ class AppDecoration {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        AppColors.robinEggBlue,
-        AppColors.coral,
+        AppColors.green1,
+        AppColors.logoDarkTeal,
       ],
     ),
     borderRadius: borderRadiusL,
@@ -106,8 +106,8 @@ class AppDecoration {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        AppColors.coral,
-        AppColors.brightPinkCrayola,
+        AppColors.logoDarkTeal,
+        AppColors.green1,
       ],
     ),
     borderRadius: borderRadiusL,

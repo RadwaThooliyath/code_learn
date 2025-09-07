@@ -78,10 +78,8 @@ class CourseViewModel extends ChangeNotifier {
         page: page,
         search: search,
       );
-      print("✅ Fetched ${_courses.length} courses");
     } catch (e) {
       _setError('Failed to load courses: $e');
-      print("❌ Error fetching courses: $e");
     } finally {
       _setLoading(false);
     }
@@ -93,10 +91,8 @@ class CourseViewModel extends ChangeNotifier {
     
     try {
       _selectedCourse = await _courseService.getCourseDetail(courseId);
-      print("✅ Fetched course detail: ${_selectedCourse?.title}");
     } catch (e) {
       _setError('Failed to load course details: $e');
-      print("❌ Error fetching course detail: $e");
     } finally {
       _setLoadingDetail(false);
     }
@@ -114,10 +110,8 @@ class CourseViewModel extends ChangeNotifier {
     
     try {
       _courses = await _courseService.searchCourses(query);
-      print("✅ Found ${_courses.length} courses for query: $query");
     } catch (e) {
       _setError('Failed to search courses: $e');
-      print("❌ Error searching courses: $e");
     } finally {
       _setLoading(false);
     }
@@ -155,10 +149,8 @@ class CourseViewModel extends ChangeNotifier {
         );
       }
       
-      print("✅ Found ${_courses.length} courses with filters");
     } catch (e) {
       _setError('Failed to search courses: $e');
-      print("❌ Error searching courses: $e");
     } finally {
       _setLoading(false);
     }
@@ -170,10 +162,8 @@ class CourseViewModel extends ChangeNotifier {
     
     try {
       _categories = await _courseService.getCategories();
-      print("✅ Fetched ${_categories.length} categories");
     } catch (e) {
       _setError('Failed to load categories: $e');
-      print("❌ Error fetching categories: $e");
     } finally {
       _setLoadingCategories(false);
     }
@@ -185,10 +175,8 @@ class CourseViewModel extends ChangeNotifier {
     
     try {
       _enrolledCourses = await _courseService.getEnrolledCourses();
-      print("✅ Fetched ${_enrolledCourses.length} enrolled courses");
     } catch (e) {
       _setError('Failed to load enrolled courses: $e');
-      print("❌ Error fetching enrolled courses: $e");
     } finally {
       _setLoadingEnrolled(false);
     }

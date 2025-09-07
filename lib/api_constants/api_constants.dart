@@ -8,17 +8,20 @@ class ApiConstants {
   static const String loginEndpoint = "/login/";
   static const String registerEndpoint = "/register/";
   static const String refreshEndpoint = "/refresh/";
+  static const String passwordResetEndpoint = "/password-reset/";
+  static const String passwordResetConfirmEndpoint = "/password-reset-confirm/";
   
   // Profile endpoints
   static const String profileEndpoint = "/profile/";
   static const String changePasswordEndpoint = "/profile/change-password/";
+  static const String deleteAccountEndpoint = "/profile/delete-account/";
   
   // Course endpoints
   static const String coursesEndpoint = "/";
   static const String courseSearchEndpoint = "/search/";
   static const String courseCategoriesEndpoint = "/categories/";
   static const String enrolledCoursesEndpoint = "/enrolled/";
-  static const String enrollCourseEndpoint = "/enroll/";
+  static const String enrollCourseEndpoint = "/purchase-course/";
   
   // Payment endpoints
   static const String paymentsBaseUrl = "$baseUrl/payments";
@@ -33,17 +36,20 @@ class ApiConstants {
   static String get login => "$authBaseUrl$loginEndpoint";
   static String get register => "$authBaseUrl$registerEndpoint";
   static String get refresh => "$authBaseUrl$refreshEndpoint";
+  static String get passwordReset => "$authBaseUrl$passwordResetEndpoint";
+  static String passwordResetConfirm(String token) => "$authBaseUrl$passwordResetConfirmEndpoint$token/";
   
   // Course URLs
   static String get courses => "$coursesBaseUrl$coursesEndpoint";
   static String get courseSearch => "$coursesBaseUrl$courseSearchEndpoint";
   static String get courseCategories => "$coursesBaseUrl$courseCategoriesEndpoint";
   static String get enrolledCourses => "$coursesBaseUrl$enrolledCoursesEndpoint";
-  static String get enrollCourse => "$coursesBaseUrl$enrollCourseEndpoint";
+  static String get enrollCourse => "$paymentsBaseUrl$enrollCourseEndpoint";
   
   // Profile URLs
   static String get userProfile => "$usersBaseUrl$profileEndpoint";
   static String get changePassword => "$usersBaseUrl$changePasswordEndpoint";
+  static String get deleteAccount => "$usersBaseUrl$deleteAccountEndpoint";
   
   // Payment URLs
   static String get myEnrollments => "$paymentsBaseUrl$myEnrollmentsEndpoint";
@@ -81,4 +87,12 @@ class ApiConstants {
   static String teamDetail(int teamId) => "$usersBaseUrl$teamsEndpoint$teamId/";
   static String joinTeam(int teamId) => "$usersBaseUrl$teamsEndpoint$teamId/join/";
   static String leaveTeam(int teamId) => "$usersBaseUrl$teamsEndpoint$teamId/leave/";
+  
+  // Rating URLs
+  static String courseRatings(int courseId) => "$baseUrl/ratings/course/$courseId/ratings/";
+  static String userCourseRating(int courseId) => "$baseUrl/ratings/course/$courseId/my-rating/";
+  static String courseRatingStats(int courseId) => "$baseUrl/ratings/course/$courseId/rating-stats/";
+  static String userRatingStatus(int courseId) => "$baseUrl/ratings/course/$courseId/rating-status/";
+  static String courseReviews(int courseId) => "$baseUrl/ratings/course/$courseId/reviews/";
+  static String toggleReviewHelpful(int reviewId) => "$baseUrl/ratings/review/$reviewId/helpful/";
 }

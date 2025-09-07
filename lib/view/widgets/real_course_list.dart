@@ -26,47 +26,45 @@ class RealCourseList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            if (onSeeAll != null)
+              TextButton(
+                onPressed: onSeeAll,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+             backgroundColor: AppColors
+                  .brightPinkCrayola,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "View All",
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
                   ),
                 ),
               ),
-              if (onSeeAll != null)
-                TextButton(
-                  onPressed: onSeeAll,
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    backgroundColor: AppColors.robinEggBlue.withValues(alpha: 0.2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: const Text(
-                    "View All",
-                    style: TextStyle(
-                      color: AppColors.robinEggBlue,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
         AppSpacing.small,
         if (isLoading)
           SizedBox(
-            height: 260,
+            height: 100,
             child: Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.robinEggBlue),
@@ -75,7 +73,7 @@ class RealCourseList extends StatelessWidget {
           )
         else if (courses.isEmpty)
           SizedBox(
-            height: 260,
+            height: 100,
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -99,11 +97,11 @@ class RealCourseList extends StatelessWidget {
           )
         else
           SizedBox(
-            height: 260,
+            height: 480,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: courses.length,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+
               itemBuilder: (context, index) {
                 final course = courses[index];
                 return RealCourseCard(

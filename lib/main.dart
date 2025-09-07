@@ -3,10 +3,16 @@ import 'package:uptrail/view/navigPage.dart';
 import 'package:uptrail/view/splash_screen.dart';
 import 'package:uptrail/view_model/auth_viewModel.dart';
 import 'package:uptrail/view_model/course_viewmodel.dart';
+import 'package:uptrail/services/security_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize security service to prevent screenshots and screen recording
+  await SecurityService.instance.initializeSecurity();
+  
   runApp(MyApp());
 }
 
@@ -58,7 +64,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         if (authViewModel.isAuthenticated) {
           return const Navigpage();
         } else {
-          return const Loginpage();
+          return const LoginPage();
         }
       },
     );

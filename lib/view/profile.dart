@@ -4,6 +4,8 @@ import 'package:uptrail/app_constants/colors.dart';
 import 'package:uptrail/view_model/auth_viewModel.dart';
 import 'package:uptrail/view_model/course_viewmodel.dart';
 import 'package:uptrail/view/edit_profile.dart';
+import 'package:uptrail/view/privacy_security_page.dart';
+import 'package:uptrail/view/help_support_page.dart';
 import 'package:provider/provider.dart';
 
 class UserProfilePage extends StatefulWidget {
@@ -254,8 +256,21 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           MaterialPageRoute(builder: (context) => const EditProfilePage()),
                         );
                       }),
-                      _buildActionRow(Icons.security, "Privacy & Security", () {}),
-                      _buildActionRow(Icons.help_outline, "Help & Support", () {}),
+                      _buildActionRow(Icons.security, "Privacy & Security", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const PrivacySecurityPage()),
+                        );
+                      }),
+                      _buildActionRow(Icons.help_outline, "Help & Support", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HelpSupportPage()),
+                        );
+                      }),
+                      _buildActionRow(Icons.delete_forever, "Delete Account", () {
+                        _showDeleteAccountConfirmDialog();
+                      }, isDestructive: true),
                       _buildActionRow(Icons.logout, "Sign Out", () async {
                         final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
                         await authViewModel.logout();
@@ -418,6 +433,178 @@ class _UserProfilePageState extends State<UserProfilePage> {
     } else {
       final years = (difference / 365).floor();
       return years == 1 ? "1 year ago" : "$years years ago";
+    }
+  }
+
+  void _showDeleteAccountConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.red[600], size: 28),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Delete Account',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to delete your account?',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'This action will permanently:',
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '• Delete your account and profile',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
+              ),
+              Text(
+                '• Remove all enrollment details',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
+              ),
+              Text(
+                '• Clear all learning progress',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
+              ),
+              Text(
+                '• Cancel active subscriptions',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Payment records will be preserved for tax purposes.',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'This action cannot be undone.',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteAccount();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Delete Account'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteAccount() async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          backgroundColor: Colors.white,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: Colors.red),
+              SizedBox(height: 16),
+              Text(
+                'Deleting account...',
+                style: TextStyle(color: Colors.black87),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      final result = await authViewModel.deleteAccount();
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      if (result['success']) {
+        // Show success message and logout
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+
+        // Wait a moment then logout (which will navigate to login)
+        await Future.delayed(const Duration(seconds: 1));
+        await authViewModel.logout();
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      Navigator.of(context).pop();
+      
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete account: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 }

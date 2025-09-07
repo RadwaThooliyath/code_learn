@@ -35,8 +35,6 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
       // Perform submit logic here
       final githubLink = _linkController.text.trim();
       final notes = _noteController.text.trim();
-      print("Submitted GitHub Link: $githubLink");
-      print("Notes: $notes");
 
       // Show success or move to next screen
       ScaffoldMessenger.of(context).showSnackBar(

@@ -22,14 +22,11 @@ class AssignmentService {
     var response = await request();
     
     if (response.statusCode == 401) {
-      print("🔄 Token expired, attempting refresh...");
       final newToken = await _authService.refreshToken();
       
       if (newToken != null) {
-        print("✅ Token refreshed, retrying request...");
         response = await request();
       } else {
-        print("❌ Token refresh failed, user needs to re-login");
       }
     }
     
@@ -39,14 +36,11 @@ class AssignmentService {
   Future<List<Assignment>> getModuleAssignments(int moduleId) async {
     try {
       final url = Uri.parse(ApiConstants.moduleAssignments(moduleId));
-      print("📝 Fetching module assignments from: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -57,7 +51,6 @@ class AssignmentService {
         } else if (data is List) {
           assignmentsList = data;
         } else {
-          print("❌ Unexpected response format for assignments");
           return [];
         }
         
@@ -65,14 +58,11 @@ class AssignmentService {
             .map((assignmentJson) => Assignment.fromJson(assignmentJson))
             .toList();
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to fetch assignments: ${response.statusCode}");
         throw Exception('Failed to fetch assignments: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching assignments: $e");
       throw Exception('Error fetching assignments: $e');
     }
   }
@@ -80,27 +70,21 @@ class AssignmentService {
   Future<Assignment> getAssignmentDetail(int assignmentId) async {
     try {
       final url = Uri.parse(ApiConstants.assignmentDetail(assignmentId));
-      print("📝 Fetching assignment detail from: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return Assignment.fromJson(data);
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to fetch assignment detail: ${response.statusCode}");
         throw Exception('Failed to fetch assignment detail: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching assignment detail: $e");
       throw Exception('Error fetching assignment detail: $e');
     }
   }
@@ -122,14 +106,11 @@ class AssignmentService {
         url = url.replace(queryParameters: queryParams);
       }
 
-      print("📝 Fetching assignment submissions from: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -140,7 +121,6 @@ class AssignmentService {
         } else if (data is List) {
           submissionsList = data;
         } else {
-          print("❌ Unexpected response format for submissions");
           return [];
         }
         
@@ -148,14 +128,11 @@ class AssignmentService {
             .map((submissionJson) => AssignmentSubmission.fromJson(submissionJson))
             .toList();
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to fetch assignment submissions: ${response.statusCode}");
         throw Exception('Failed to fetch assignment submissions: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching assignment submissions: $e");
       throw Exception('Error fetching assignment submissions: $e');
     }
   }
@@ -168,7 +145,6 @@ class AssignmentService {
   }) async {
     try {
       final url = Uri.parse(ApiConstants.assignmentSubmissions);
-      print("📝 Creating assignment submission at: $url");
       
       final body = jsonEncode({
         'assignment': assignmentId,
@@ -177,7 +153,6 @@ class AssignmentService {
         'status': status,
       });
       
-      print("Request Body: $body");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.post(
@@ -187,22 +162,17 @@ class AssignmentService {
         );
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return AssignmentSubmission.fromJson(data);
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to create assignment submission: ${response.statusCode}");
         final errorData = jsonDecode(response.body);
         throw Exception(errorData['message'] ?? 'Failed to create assignment submission');
       }
     } catch (e) {
-      print("❌ Error creating assignment submission: $e");
       throw Exception('Error creating assignment submission: $e');
     }
   }
@@ -215,7 +185,6 @@ class AssignmentService {
   }) async {
     try {
       final url = Uri.parse(ApiConstants.assignmentSubmissionDetail(submissionId));
-      print("📝 Updating assignment submission at: $url");
       
       Map<String, dynamic> bodyData = {};
       if (githubUrl != null) bodyData['github_url'] = githubUrl;
@@ -223,7 +192,6 @@ class AssignmentService {
       if (status != null) bodyData['status'] = status;
       
       final body = jsonEncode(bodyData);
-      print("Request Body: $body");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.put(
@@ -233,22 +201,17 @@ class AssignmentService {
         );
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return AssignmentSubmission.fromJson(data);
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to update assignment submission: ${response.statusCode}");
         final errorData = jsonDecode(response.body);
         throw Exception(errorData['message'] ?? 'Failed to update assignment submission');
       }
     } catch (e) {
-      print("❌ Error updating assignment submission: $e");
       throw Exception('Error updating assignment submission: $e');
     }
   }
@@ -256,7 +219,6 @@ class AssignmentService {
   Future<AssignmentSubmission> submitAssignment(int submissionId) async {
     try {
       final url = Uri.parse(ApiConstants.assignmentSubmissionDetail(submissionId));
-      print("📝 Submitting assignment at: $url");
       
       final body = jsonEncode({'status': 'submitted'});
       
@@ -268,22 +230,17 @@ class AssignmentService {
         );
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return AssignmentSubmission.fromJson(data);
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to submit assignment: ${response.statusCode}");
         final errorData = jsonDecode(response.body);
         throw Exception(errorData['message'] ?? 'Failed to submit assignment');
       }
     } catch (e) {
-      print("❌ Error submitting assignment: $e");
       throw Exception('Error submitting assignment: $e');
     }
   }

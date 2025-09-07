@@ -6,6 +6,7 @@ import 'package:uptrail/services/enrollment_service.dart';
 import 'package:uptrail/services/payment_service.dart';
 import 'package:uptrail/utils/app_text_style.dart';
 import 'package:uptrail/view/course_detail_page.dart';
+import 'package:uptrail/view/checkout_summary_page.dart';
 
 class PublicCoursesPage extends StatefulWidget {
   const PublicCoursesPage({super.key});
@@ -85,13 +86,9 @@ class _PublicCoursesPageState extends State<PublicCoursesPage> {
         // Close loading dialog
         if (mounted) Navigator.of(context).pop();
       } else {
-        // Use payment service for paid courses
-        result = await _paymentService.initiateCoursePayment(
-          context: context,
-          course: course,
-          userEmail: 'user@example.com', // TODO: Get from user profile
-          userPhone: '+919876543210', // TODO: Get from user profile
-        );
+        // Navigate to checkout summary for paid courses
+        await _handlePaidCourseEnrollment(course);
+        return; // Exit early for paid courses
       }
 
       if (result['success'] == true) {
@@ -371,6 +368,60 @@ class _PublicCoursesPageState extends State<PublicCoursesPage> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
+                            const SizedBox(width: 16),
+                            if (course.rating != null && course.rating! > 0) ...[
+                              Icon(
+                                Icons.star,
+                                size: 16,
+                                color: Colors.amber.shade600,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                course.rating!.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            if (course.enrolledCount != null) ...[
+                              const Icon(
+                                Icons.people,
+                                size: 14,
+                                color: Colors.black45,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "${course.enrolledCount} students",
+                                style: const TextStyle(
+                                  color: Colors.black45,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                            if (course.level != null) ...[
+                              if (course.enrolledCount != null) const SizedBox(width: 12),
+                              Icon(
+                                Icons.trending_up,
+                                size: 14,
+                                color: _getLevelColor(course.level!),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                course.level!.toUpperCase(),
+                                style: TextStyle(
+                                  color: _getLevelColor(course.level!),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],
@@ -472,5 +523,63 @@ class _PublicCoursesPageState extends State<PublicCoursesPage> {
         ),
       ),
     );
+  }
+
+  Color _getLevelColor(String level) {
+    switch (level.toLowerCase()) {
+      case 'beginner':
+        return Colors.green.shade600;
+      case 'intermediate':
+        return Colors.orange.shade600;
+      case 'advanced':
+        return Colors.red.shade600;
+      default:
+        return Colors.blue.shade600;
+    }
+  }
+
+  Future<void> _handlePaidCourseEnrollment(Course course) async {
+    try {
+      // First, get the course pricing
+      final pricing = await _enrollmentService.getCoursePricing(course.id);
+      if (pricing == null) {
+        _showEnrollmentResult(
+          success: false,
+          title: 'Error',
+          message: 'Unable to fetch course pricing. Please try again.',
+        );
+        return;
+      }
+
+      // Navigate to checkout summary page
+      final result = await Navigator.of(context).push<Map<String, dynamic>>(
+        MaterialPageRoute(
+          builder: (context) => CheckoutSummaryPage(
+            course: course,
+            pricing: pricing,
+            userEmail: 'user@example.com', // TODO: Get from user profile
+            userPhone: '+919876543210', // TODO: Get from user profile
+          ),
+        ),
+      );
+
+      // Handle the result from checkout
+      if (result != null && result['success'] == true) {
+        _showEnrollmentResult(
+          success: true,
+          title: 'Payment Successful!',
+          message: result['message'] ?? 'You have successfully enrolled in this course.',
+        );
+        
+        // Refresh courses list to update enrollment status
+        _loadCourses();
+      }
+    } catch (e) {
+      _showEnrollmentResult(
+        success: false,
+        title: 'Error',
+        message: 'An error occurred: ${e.toString()}',
+      );
+    }
   }
 }

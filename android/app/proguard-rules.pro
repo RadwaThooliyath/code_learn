@@ -52,3 +52,30 @@
 
 # Keep annotation default values (e.g., retrofit2.http.Field.encoded)
 -keepattributes AnnotationDefault
+
+# Additional optimizations for size reduction
+-optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
+-optimizationpasses 3
+-allowaccessmodification
+
+# Remove logging in release builds
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int i(...);
+    public static int w(...);
+    public static int d(...);
+    public static int e(...);
+}
+
+# Remove debug print statements
+-assumenosideeffects class java.io.PrintStream {
+    public void println(%);
+    public void println(**);
+}
+
+# YouTube Player specific
+-keep class com.sarbagyastha.youtube_player_flutter.** { *; }
+
+# PDF Viewer specific
+-keep class com.github.barteksc.pdfviewer.** { *; }

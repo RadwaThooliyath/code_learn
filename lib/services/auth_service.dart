@@ -5,13 +5,21 @@ import 'package:uptrail/model/user_model.dart';
 import 'package:uptrail/services/storage_service.dart';
 import 'package:http/http.dart' as http;
 
+class LoginException implements Exception {
+  final String message;
+  final Map<String, String>? fieldErrors;
+  
+  LoginException(this.message, {this.fieldErrors});
+  
+  @override
+  String toString() => message;
+}
+
 class AuthService {
   Future<User?> login(String email, String password) async {
     final url = Uri.parse(ApiConstants.login);
     final requestBody = {"email": email, "password": password};
     
-    print("Login URL: $url");
-    print("Request Body: ${jsonEncode(requestBody)}");
     
     try {
       final response = await http.post(
@@ -20,22 +28,17 @@ class AuthService {
         body: jsonEncode(requestBody),
       );
       
-      print("Response Status Code: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print("📦 Login response data: $data");
         
         final accessToken = data['access'] as String?;
         final refreshToken = data['refresh'] as String?;
         
         if (accessToken != null) {
-          print("💾 Saving access token: ${accessToken.substring(0, 10)}...");
           await StorageService.saveToken(accessToken);
           
           if (refreshToken != null) {
-            print("💾 Saving refresh token: ${refreshToken.substring(0, 10)}...");
             await StorageService.saveRefreshToken(refreshToken);
           }
           
@@ -52,7 +55,6 @@ class AuthService {
               
               final decoded = utf8.decode(base64Url.decode(normalizedPayload));
               final payloadData = jsonDecode(decoded);
-              print("🔓 JWT payload: $payloadData");
               
               final user = User(
                 id: payloadData['user_id'],
@@ -62,7 +64,6 @@ class AuthService {
                 token: accessToken,
               );
               
-              print("💾 Saving user data from JWT: ID=${user.id}, Name=${user.name}, Role=${user.role}");
               await StorageService.saveUserData(
                 userId: user.id.toString(),
                 name: user.name!,
@@ -72,20 +73,91 @@ class AuthService {
               return user;
             }
           } catch (e) {
-            print("❌ Error decoding JWT: $e");
           }
         }
         
-        print("⚠️ No access token found in response");
         return null;
+      } else if (response.statusCode == 401) {
+        // Parse response body to get specific error message
+        print('🔥 LOGIN ERROR - Status Code: ${response.statusCode}');
+        print('🔥 LOGIN ERROR - Response Body: ${response.body}');
+        try {
+          final data = jsonDecode(response.body);
+          print('🔥 LOGIN ERROR - Parsed Data: $data');
+          final errorMessage = data['error'] ?? data['detail'] ?? 'Invalid credentials';
+          
+          // Check if the error response contains field-specific errors
+          Map<String, String>? fieldErrors;
+          if (data is Map<String, dynamic>) {
+            fieldErrors = <String, String>{};
+            
+            // Look for common field error patterns
+            if (data.containsKey('email')) {
+              fieldErrors['email'] = data['email'].toString();
+            }
+            if (data.containsKey('password')) {
+              fieldErrors['password'] = data['password'].toString();
+            }
+            
+            // Check if the error is about specific field
+            final errorMsg = errorMessage.toLowerCase();
+            if (errorMsg.contains('email')) {
+              fieldErrors['email'] = 'Email not found or invalid';
+            } else if (errorMsg.contains('password')) {
+              fieldErrors['password'] = 'Incorrect password';
+            }
+            
+            // If we have field-specific errors, don't use the general error message
+            if (fieldErrors.isNotEmpty) {
+              throw LoginException('', fieldErrors: fieldErrors);
+            }
+          }
+          
+          throw LoginException(errorMessage, fieldErrors: fieldErrors);
+        } catch (e) {
+          if (e is LoginException) rethrow;
+          throw LoginException("Invalid email or password");
+        }
+      } else if (response.statusCode == 400) {
+        print('🔥 LOGIN ERROR - Status Code: ${response.statusCode}');
+        print('🔥 LOGIN ERROR - Response Body: ${response.body}');
+        try {
+          final data = jsonDecode(response.body);
+          print('🔥 LOGIN ERROR - Parsed Data: $data');
+          final errorMessage = data['error'] ?? data['detail'] ?? 'Invalid request';
+          
+          // Parse field-specific validation errors
+          Map<String, String>? fieldErrors;
+          if (data is Map<String, dynamic>) {
+            fieldErrors = <String, String>{};
+            if (data.containsKey('email')) {
+              fieldErrors['email'] = data['email'].toString();
+            }
+            if (data.containsKey('password')) {
+              fieldErrors['password'] = data['password'].toString();
+            }
+            
+            // If we have field-specific errors, don't use the general error message
+            if (fieldErrors.isNotEmpty) {
+              throw LoginException('', fieldErrors: fieldErrors);
+            }
+          }
+          
+          throw LoginException(errorMessage, fieldErrors: fieldErrors);
+        } catch (e) {
+          if (e is LoginException) rethrow;
+          throw LoginException("Please check your input and try again");
+        }
       } else {
-        print("Login failed with status: ${response.statusCode}");
-        print("Error response: ${response.body}");
-        throw Exception("Failed to login ${response.statusCode}");
+        print('🔥 LOGIN ERROR - Status Code: ${response.statusCode}');
+        print('🔥 LOGIN ERROR - Response Body: ${response.body}');
+        throw Exception("Login failed. Please try again later");
       }
     } catch (e) {
-      print("Login error : $e");
-      return null;
+      if (e is Exception) {
+        rethrow; // Re-throw our custom exceptions
+      }
+      throw Exception("Network error. Please check your internet connection");
     }
   }
 
@@ -132,7 +204,6 @@ class AuthService {
         throw Exception("Failed to register ${response.statusCode}");
       }
     } catch (e) {
-      print("Register error : $e");
       return null;
     }
   }
@@ -149,14 +220,12 @@ class AuthService {
     try {
       final refreshToken = await StorageService.getRefreshToken();
       if (refreshToken == null) {
-        print("❌ No refresh token available");
         return null;
       }
 
       final url = Uri.parse(ApiConstants.refresh);
       final requestBody = {"refresh": refreshToken};
       
-      print("🔄 Refreshing token at: $url");
       
       final response = await http.post(
         url,
@@ -164,28 +233,129 @@ class AuthService {
         body: jsonEncode(requestBody),
       );
       
-      print("Refresh Response Status: ${response.statusCode}");
-      print("Refresh Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final newAccessToken = data['access'] as String?;
         
         if (newAccessToken != null) {
-          print("✅ Token refreshed successfully");
           await StorageService.saveToken(newAccessToken);
           return newAccessToken;
         }
       } else {
-        print("❌ Token refresh failed: ${response.statusCode}");
         // If refresh fails, clear all data and force re-login
         await StorageService.clearAllData();
       }
     } catch (e) {
-      print("❌ Error refreshing token: $e");
       await StorageService.clearAllData();
     }
     
     return null;
+  }
+
+  Future<bool> requestPasswordReset(String email) async {
+    final url = Uri.parse(ApiConstants.passwordReset);
+    final requestBody = {"email": email};
+    
+    
+    try {
+      final response = await http.post(
+        url,
+        headers: {"content-type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+      
+      
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> confirmPasswordReset({
+    required String token,
+    required String newPassword,
+    required String newPasswordConfirm,
+  }) async {
+    final url = Uri.parse(ApiConstants.passwordResetConfirm(token));
+    final requestBody = {
+      "new_password": newPassword,
+      "new_password_confirm": newPasswordConfirm,
+    };
+    
+    
+    try {
+      final response = await http.post(
+        url,
+        headers: {"content-type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+      
+      
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'Password reset successful'
+        };
+      } else {
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': data['error'] ?? 'Password reset failed',
+          'errors': data
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error occurred'
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) {
+        return {
+          'success': false,
+          'message': 'User not authenticated'
+        };
+      }
+
+      final url = Uri.parse(ApiConstants.deleteAccount);
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Clear all stored data after successful deletion
+        await StorageService.clearAll();
+        
+        return {
+          'success': true,
+          'message': 'Account deleted successfully'
+        };
+      } else {
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': data['error'] ?? 'Account deletion failed'
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error occurred'
+      };
+    }
   }
 }

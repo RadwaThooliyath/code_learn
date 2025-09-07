@@ -22,14 +22,11 @@ class EnrollmentService {
     var response = await request();
     
     if (response.statusCode == 401) {
-      print("🔄 Token expired, attempting refresh...");
       final newToken = await _authService.refreshToken();
       
       if (newToken != null) {
-        print("✅ Token refreshed, retrying request...");
         response = await request();
       } else {
-        print("❌ Token refresh failed, user needs to re-login");
       }
     }
     
@@ -51,7 +48,6 @@ class EnrollmentService {
         final installmentPlans = await _getInstallmentPlans(enrollmentId);
         data['installment_plans'] = installmentPlans;
       } catch (e) {
-        print("⚠️ No installment plans available for enrollment $enrollmentId: $e");
         data['installment_plans'] = [];
       }
       
@@ -65,25 +61,19 @@ class EnrollmentService {
     // Use the correct endpoint from API documentation
     final possibleUrls = [
       '${ApiConstants.paymentsBaseUrl}/enrollments/$enrollmentId/installment-plan/',
-      '${ApiConstants.paymentsBaseUrl}/enrollments/$enrollmentId/installments/',
-      '${ApiConstants.paymentsBaseUrl}/installments/?enrollment_id=$enrollmentId',
-      '${ApiConstants.paymentsBaseUrl}/my-installments/?enrollment_id=$enrollmentId',
     ];
     
     for (String urlString in possibleUrls) {
       try {
         final url = Uri.parse(urlString);
-        print("🔍 Trying installment endpoint: $url");
         
         final response = await _makeAuthorizedRequest(() async {
           return await http.get(url, headers: await _getHeaders());
         });
         
-        print("Response Status: ${response.statusCode}");
         
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          print("✅ Found installment data: $data");
           
           if (data is List) {
             return data.cast<Map<String, dynamic>>();
@@ -95,7 +85,6 @@ class EnrollmentService {
             // Handle the current API response format - payments are installments
             final payments = data['payments'] as List<dynamic>;
             if (payments.isNotEmpty) {
-              print("✅ Found ${payments.length} payment installments");
               return payments.cast<Map<String, dynamic>>();
             }
           } else if (data is Map && data.containsKey('enrollment_details')) {
@@ -120,7 +109,6 @@ class EnrollmentService {
           }
         }
       } catch (e) {
-        print("⚠️ Failed to fetch from $urlString: $e");
         continue;
       }
     }
@@ -134,8 +122,8 @@ class EnrollmentService {
     String? search,
   }) async {
     try {
-      // Use the working enrolled courses endpoint instead
-      Uri url = Uri.parse(ApiConstants.enrolledCourses);
+      // Use the correct payment endpoint for enrollments
+      Uri url = Uri.parse('${ApiConstants.paymentsBaseUrl}/my-enrollments/');
       
       Map<String, String> queryParams = {};
       if (page != null) queryParams['page'] = page.toString();
@@ -145,127 +133,143 @@ class EnrollmentService {
         url = url.replace(queryParameters: queryParams);
       }
 
-      print("💰 Fetching enrollments from: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         
-        List<dynamic> courses;
+        List<dynamic> enrollmentList;
         if (data is Map && data.containsKey('results')) {
-          courses = data['results'];
+          enrollmentList = data['results'];
         } else if (data is List) {
-          courses = data;
+          enrollmentList = data;
         } else {
-          print("❌ Unexpected response format for enrollments");
           return [];
         }
         
-        // Convert courses to enrollments and get real payment data
+        // Convert API response to Enrollment objects
         List<Enrollment> enrollments = [];
-        for (var courseJson in courses) {
-          final course = courseJson as Map<String, dynamic>;
-          final courseId = course['id'] ?? 0;
+        for (var enrollmentJson in enrollmentList) {
+          final enrollmentData = enrollmentJson as Map<String, dynamic>;
           
-          // Try to get real payment information
-          try {
-            final paymentDetails = await _getEnrollmentDetails(courseId);
-            final enrollment = paymentDetails['enrollment'] as Map<String, dynamic>?;
-            final installmentPlansData = paymentDetails['installment_plans'] as List<dynamic>?;
-            
-            // Parse installment plans
-            List<Installment>? installments;
-            if (installmentPlansData != null && installmentPlansData.isNotEmpty) {
-              installments = installmentPlansData
-                  .map((planData) => Installment.fromJson(planData as Map<String, dynamic>))
-                  .toList();
-            }
-            
-            enrollments.add(Enrollment(
-              id: courseId,
-              courseId: courseId,
-              courseName: course['title'] ?? 'Unknown Course',
-              courseImage: course['thumbnail_url'] ?? course['thumbnail'],
-              enrolledAt: course['created_at'] != null 
-                  ? DateTime.parse(course['created_at'])
-                  : DateTime.now(),
-              status: 'active',
-              totalAmount: enrollment != null 
-                  ? double.tryParse(enrollment['total_amount']?.toString() ?? '0') ?? 0.0
-                  : (course['price'] != null 
-                      ? double.tryParse(course['price'].toString()) ?? 0.0
-                      : 0.0),
-              paidAmount: enrollment != null 
-                  ? ((double.tryParse(enrollment['total_amount']?.toString() ?? '0') ?? 0.0) - (double.tryParse(enrollment['outstanding_amount']?.toString() ?? '0') ?? 0.0))
-                  : (course['price'] != null 
-                      ? double.tryParse(course['price'].toString()) ?? 0.0
-                      : 0.0),
-              remainingAmount: enrollment != null 
-                  ? double.tryParse(enrollment['outstanding_amount']?.toString() ?? '0') ?? 0.0
-                  : 0.0,
-              paymentStatus: enrollment?['payment_status'] ?? 'paid',
-              payments: [], // Will be loaded separately
-              installments: installments,
-              courseModules: course['modules'], // Capture modules if present
-            ));
-          } catch (e) {
-            print("⚠️ Failed to get payment details for course $courseId: $e");
-            // Fallback to basic enrollment data
-            enrollments.add(Enrollment(
-              id: courseId,
-              courseId: courseId,
-              courseName: course['title'] ?? 'Unknown Course',
-              courseImage: course['thumbnail_url'] ?? course['thumbnail'],
-              enrolledAt: course['created_at'] != null 
-                  ? DateTime.parse(course['created_at'])
-                  : DateTime.now(),
-              status: 'active',
-              totalAmount: course['price'] != null 
-                  ? double.tryParse(course['price'].toString()) ?? 0.0
-                  : 0.0,
-              paidAmount: course['price'] != null 
-                  ? double.tryParse(course['price'].toString()) ?? 0.0
-                  : 0.0,
-              remainingAmount: 0.0,
-              paymentStatus: 'paid',
-              payments: [],
-              installments: null,
-              courseModules: course['modules'], // Capture modules if present
-            ));
+          // Parse enrollment data from the payment API response
+          final enrollmentId = enrollmentData['id'] ?? 0;
+          final courseId = enrollmentData['course'] ?? 0;
+          final courseName = enrollmentData['course_title'] ?? 'Unknown Course';
+          final courseImage = null; // Not provided in this API response
+          final installmentPlan = enrollmentData['installment_plan'] as Map<String, dynamic>?;
+          
+          // Extract payment information directly from enrollment data
+          final totalAmount = double.tryParse(enrollmentData['total_amount']?.toString() ?? '0') ?? 0.0;
+          final outstandingAmount = double.tryParse(enrollmentData['outstanding_amount']?.toString() ?? '0') ?? 0.0;
+          final paidAmount = double.tryParse(enrollmentData['paid_amount']?.toString() ?? '0') ?? 0.0;
+          final paymentStatus = enrollmentData['payment_status'] ?? 'unknown';
+          
+          // Debug payment calculations
+          
+          // Determine correct payment status based on amounts
+          String finalPaymentStatus;
+          if (outstandingAmount <= 0 && totalAmount > 0) {
+            finalPaymentStatus = 'completed';
+          } else if (paidAmount > 0 && outstandingAmount > 0) {
+            finalPaymentStatus = 'partial';
+          } else if (paidAmount <= 0 && totalAmount > 0) {
+            finalPaymentStatus = 'pending';
+          } else {
+            finalPaymentStatus = paymentStatus;
           }
+          
+          // Create installment data from API response if available
+          List<Installment>? installments;
+          if (installmentPlan != null && enrollmentData['has_installment_plan'] == true) {
+            try {
+              // Create installment objects from the plan data
+              final totalInstallments = installmentPlan['total_installments'] ?? 1;
+              final installmentAmount = installmentPlan['installment_amount']?.toDouble() ?? 0.0;
+              final remainingInstallments = installmentPlan['remaining_installments'] ?? 0;
+              final nextDueDate = installmentPlan['next_due_date'];
+              
+              installments = [];
+              
+              // Create paid installments
+              final paidInstallments = totalInstallments - remainingInstallments;
+              for (int i = 1; i <= paidInstallments; i++) {
+                final daysDiff = ((paidInstallments - i + 1) * 30).toInt();
+                installments.add(Installment(
+                  id: i,
+                  enrollmentId: enrollmentId,
+                  amount: installmentAmount,
+                  dueDate: DateTime.now().subtract(Duration(days: daysDiff)),
+                  status: 'paid',
+                  paidDate: DateTime.now().subtract(Duration(days: daysDiff)),
+                  transactionId: null,
+                ));
+              }
+              
+              // Create remaining installments
+              for (int i = paidInstallments + 1; i <= totalInstallments; i++) {
+                final daysOffset = ((i - paidInstallments - 1) * 30).toInt();
+                final futureDays = ((i - paidInstallments) * 30).toInt();
+                final dueDate = nextDueDate != null 
+                    ? DateTime.parse(nextDueDate).add(Duration(days: daysOffset))
+                    : DateTime.now().add(Duration(days: futureDays));
+                    
+                installments.add(Installment(
+                  id: i,
+                  enrollmentId: enrollmentId,
+                  amount: installmentAmount,
+                  dueDate: dueDate,
+                  status: 'pending',
+                  transactionId: null,
+                ));
+              }
+              
+            } catch (e) {
+            }
+          }
+          
+          enrollments.add(Enrollment(
+            id: enrollmentId,
+            courseId: courseId,
+            courseName: courseName,
+            courseImage: courseImage,
+            enrolledAt: enrollmentData['enrolled_on'] != null 
+                ? DateTime.parse(enrollmentData['enrolled_on'])
+                : DateTime.now(),
+            status: enrollmentData['active'] == true ? 'active' : 'inactive',
+            totalAmount: totalAmount,
+            paidAmount: paidAmount,
+            remainingAmount: outstandingAmount,
+            paymentStatus: finalPaymentStatus,
+            payments: [], // Will be loaded separately if needed
+            installments: installments,
+            courseModules: null, // Not provided in payment API
+          ));
         }
         
         return enrollments;
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to fetch enrollments: ${response.statusCode}");
         throw Exception('Failed to fetch enrollments: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching enrollments: $e");
       throw Exception('Error fetching enrollments: $e');
     }
   }
 
   Future<List<PaymentRecord>> getEnrollmentPayments(int enrollmentId) async {
     try {
-      final url = Uri.parse(ApiConstants.enrollmentPayments(enrollmentId));
-      print("💳 Fetching enrollment payments from: $url");
+      final url = Uri.parse('${ApiConstants.paymentsBaseUrl}/enrollments/$enrollmentId/payments/');
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -274,7 +278,6 @@ class EnrollmentService {
           // Handle the actual API response format
           final paymentsList = data['payments'] as List;
           if (paymentsList.isEmpty) {
-            print("ℹ️ No payment records found for enrollment $enrollmentId");
             return [];
           }
           return paymentsList
@@ -287,14 +290,11 @@ class EnrollmentService {
         } else if (data is List) {
           return data.map((paymentJson) => PaymentRecord.fromJson(paymentJson)).toList();
         } else {
-          print("❌ Unexpected response format for payments");
           return [];
         }
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else if (response.statusCode == 500) {
-        print("⚠️ Payment endpoint not available (500), returning mock data");
         // Return mock payment data for now
         return [
           PaymentRecord(
@@ -309,11 +309,9 @@ class EnrollmentService {
           ),
         ];
       } else {
-        print("❌ Failed to fetch enrollment payments: ${response.statusCode}");
         throw Exception('Failed to fetch enrollment payments: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching enrollment payments: $e");
       // Return empty list instead of throwing error
       return [];
     }
@@ -322,14 +320,11 @@ class EnrollmentService {
   Future<CoursePricing?> getCoursePricing(int courseId) async {
     try {
       final url = Uri.parse(ApiConstants.coursePricing(courseId));
-      print("💲 Fetching course pricing from: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -342,14 +337,11 @@ class EnrollmentService {
           return CoursePricing.fromJson(data);
         }
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to fetch course pricing: ${response.statusCode}");
         throw Exception('Failed to fetch course pricing: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching course pricing: $e");
       throw Exception('Error fetching course pricing: $e');
     }
   }
@@ -362,7 +354,6 @@ class EnrollmentService {
   }) async {
     try {
       final url = Uri.parse(ApiConstants.purchaseCourse);
-      print("🛒 Purchasing course at: $url");
       
       final body = jsonEncode({
         'course_id': courseId,
@@ -371,7 +362,6 @@ class EnrollmentService {
         if (paymentGatewayResponse != null) 'payment_gateway_response': paymentGatewayResponse,
       });
       
-      print("Request Body: $body");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.post(
@@ -381,8 +371,6 @@ class EnrollmentService {
         );
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
@@ -410,10 +398,8 @@ class EnrollmentService {
           'error': errorData,
         };
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to purchase course: ${response.statusCode}");
         final errorData = jsonDecode(response.body);
         return {
           'success': false,
@@ -422,7 +408,6 @@ class EnrollmentService {
         };
       }
     } catch (e) {
-      print("❌ Error purchasing course: $e");
       return {
         'success': false,
         'message': 'Network error: ${e.toString()}',
@@ -437,7 +422,6 @@ class EnrollmentService {
           .map((planData) => Installment.fromJson(planData))
           .toList();
     } catch (e) {
-      print("❌ Error fetching installment plans: $e");
       return [];
     }
   }
@@ -445,13 +429,12 @@ class EnrollmentService {
   Future<Map<String, dynamic>> enrollInCourse(int courseId) async {
     try {
       final url = Uri.parse(ApiConstants.enrollCourse);
-      print("📝 Enrolling in course at: $url");
       
       final body = jsonEncode({
         'course_id': courseId,
+        'payment_method': 'other', // Default payment method for free courses
       });
       
-      print("Request Body: $body");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.post(
@@ -461,12 +444,9 @@ class EnrollmentService {
         );
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        print("✅ Successfully enrolled in course $courseId");
         return {
           'success': true,
           'message': data['message'] ?? 'Successfully enrolled in course',
@@ -475,23 +455,19 @@ class EnrollmentService {
       } else if (response.statusCode == 400) {
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['message'] ?? errorData['error'] ?? 'Enrollment failed';
-        print("⚠️ Enrollment failed: $errorMessage");
         return {
           'success': false,
           'message': errorMessage,
           'data': errorData,
         };
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else if (response.statusCode == 403) {
-        print("❌ Forbidden - Course not available for public enrollment");
         return {
           'success': false,
           'message': 'This course is not available for public enrollment',
         };
       } else {
-        print("❌ Failed to enroll in course: ${response.statusCode}");
         final errorData = jsonDecode(response.body);
         return {
           'success': false,
@@ -499,7 +475,6 @@ class EnrollmentService {
         };
       }
     } catch (e) {
-      print("❌ Error enrolling in course: $e");
       return {
         'success': false,
         'message': 'Network error: ${e.toString()}',
@@ -516,7 +491,6 @@ class EnrollmentService {
         'message': 'Course is available for enrollment',
       };
     } catch (e) {
-      print("❌ Error checking enrollment eligibility: $e");
       return {
         'eligible': false,
         'message': 'Unable to check enrollment eligibility',

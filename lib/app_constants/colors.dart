@@ -22,6 +22,10 @@ class AppColors {
   // Logo gradient backgrounds
   static const Color logoTealMid = Color(0xFF1e4a4f);     // Mid teal for gradients
   static const Color logoTealBlue = Color(0xFF2a6b7a);    // Teal-blue for gradients
+  static const Color green1 = Color(0xFF00BA77);    // Teal-blue for gradients
+  static const Color green2 = Color(0xFFD5F6EA);    // Teal-blue for gradients
+
+
 }
 /*
 

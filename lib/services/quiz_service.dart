@@ -22,14 +22,11 @@ class QuizService {
     var response = await request();
     
     if (response.statusCode == 401) {
-      print("🔄 Token expired, attempting refresh...");
       final newToken = await _authService.refreshToken();
       
       if (newToken != null) {
-        print("✅ Token refreshed, retrying request...");
         response = await request();
       } else {
-        print("❌ Token refresh failed, user needs to re-login");
       }
     }
     
@@ -39,14 +36,11 @@ class QuizService {
   Future<List<Quiz>> getModuleQuizzes(int moduleId) async {
     try {
       final url = Uri.parse(ApiConstants.moduleQuizzes(moduleId));
-      print("🧠 Fetching module quizzes from: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -57,7 +51,6 @@ class QuizService {
         } else if (data is List) {
           quizzesList = data;
         } else {
-          print("❌ Unexpected response format for quizzes");
           return [];
         }
         
@@ -65,14 +58,11 @@ class QuizService {
             .map((quizJson) => Quiz.fromJson(quizJson))
             .toList();
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to fetch quizzes: ${response.statusCode}");
         throw Exception('Failed to fetch quizzes: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching quizzes: $e");
       throw Exception('Error fetching quizzes: $e');
     }
   }
@@ -80,27 +70,21 @@ class QuizService {
   Future<Quiz> getQuizDetail(int quizId) async {
     try {
       final url = Uri.parse(ApiConstants.quizDetail(quizId));
-      print("🧠 Fetching quiz detail from: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return Quiz.fromJson(data);
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to fetch quiz detail: ${response.statusCode}");
         throw Exception('Failed to fetch quiz detail: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching quiz detail: $e");
       throw Exception('Error fetching quiz detail: $e');
     }
   }
@@ -122,14 +106,11 @@ class QuizService {
         url = url.replace(queryParameters: queryParams);
       }
 
-      print("🧠 Fetching quiz attempts from: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.get(url, headers: await _getHeaders());
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -140,7 +121,6 @@ class QuizService {
         } else if (data is List) {
           attemptsList = data;
         } else {
-          print("❌ Unexpected response format for quiz attempts");
           return [];
         }
         
@@ -148,14 +128,11 @@ class QuizService {
             .map((attemptJson) => QuizAttempt.fromJson(attemptJson))
             .toList();
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to fetch quiz attempts: ${response.statusCode}");
         throw Exception('Failed to fetch quiz attempts: ${response.statusCode}');
       }
     } catch (e) {
-      print("❌ Error fetching quiz attempts: $e");
       throw Exception('Error fetching quiz attempts: $e');
     }
   }
@@ -163,7 +140,6 @@ class QuizService {
   Future<QuizAttempt> startQuizAttempt(int quizId) async {
     try {
       final url = Uri.parse(ApiConstants.startQuizAttempt(quizId));
-      print("🧠 Starting quiz attempt at: $url");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.post(
@@ -172,17 +148,13 @@ class QuizService {
         );
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return QuizAttempt.fromJson(data);
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to start quiz attempt: ${response.statusCode}");
         String errorMessage = 'Failed to start quiz attempt';
         
         try {
@@ -204,7 +176,6 @@ class QuizService {
         throw Exception(errorMessage);
       }
     } catch (e) {
-      print("❌ Error starting quiz attempt: $e");
       throw Exception('Error starting quiz attempt: $e');
     }
   }
@@ -215,13 +186,11 @@ class QuizService {
   }) async {
     try {
       final url = Uri.parse(ApiConstants.submitQuizAttempt(attemptId));
-      print("🧠 Submitting quiz attempt at: $url");
       
       final body = jsonEncode({
         'answers': answers.map((answer) => answer.toJson()).toList(),
       });
       
-      print("Request Body: $body");
       
       final response = await _makeAuthorizedRequest(() async {
         return await http.post(
@@ -231,17 +200,13 @@ class QuizService {
         );
       });
       
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return QuizAttempt.fromJson(data);
       } else if (response.statusCode == 401) {
-        print("❌ Unauthorized - User not logged in");
         throw Exception('User not authenticated');
       } else {
-        print("❌ Failed to submit quiz attempt: ${response.statusCode}");
         String errorMessage = 'Failed to submit quiz attempt';
         
         try {
@@ -263,7 +228,6 @@ class QuizService {
         throw Exception(errorMessage);
       }
     } catch (e) {
-      print("❌ Error submitting quiz attempt: $e");
       throw Exception('Error submitting quiz attempt: $e');
     }
   }

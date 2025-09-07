@@ -58,7 +58,6 @@ class _AssignmentSubmissionPageState extends State<AssignmentSubmissionPage> {
         });
       }
     } catch (e) {
-      print("Failed to load existing submission: $e");
     } finally {
       setState(() {
         _isLoading = false;

@@ -1,3 +1,4 @@
+import 'package:flutter_svg/svg.dart';
 import 'package:uptrail/app_constants/colors.dart';
 import 'package:uptrail/utils/app_spacing.dart';
 import 'package:uptrail/utils/app_decoration.dart';
@@ -33,9 +34,9 @@ class _RegisterpageState extends State<Registerpage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.coral.withValues(alpha: 0.8),
-              AppColors.brightPinkCrayola.withValues(alpha: 0.7),
-              AppColors.champagnePink.withValues(alpha: 0.9),
+              AppColors.green2.withValues(alpha: 0.8),
+              AppColors.green1.withValues(alpha: 0.7),
+              AppColors.logoDarkTeal.withValues(alpha: 0.9),
             ],
           ),
         ),
@@ -53,15 +54,16 @@ class _RegisterpageState extends State<Registerpage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: AppSpacing.paddingM,
-                        decoration: BoxDecoration(
-                          color: AppColors.coral.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.person_add_outlined,
-                          size: 48,
-                          color: AppColors.coral,
+                        width: 160,
+                        height: 60,
+
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: SvgPicture.asset(
+                            'assets/logo/logo_white.svg',
+                            width: 160,
+                            height: 160,
+                          ),
                         ),
                       ),
                       AppSpacing.medium,
@@ -258,7 +260,7 @@ class _RegisterpageState extends State<Registerpage> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Loginpage()),
+                                    builder: (context) => const LoginPage()),
                               );
                             },
                             child: const Text(
@@ -266,7 +268,7 @@ class _RegisterpageState extends State<Registerpage> {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.coral,
+                                color: AppColors.logoBrightBlue,
                               ),
                             ),
                           ),

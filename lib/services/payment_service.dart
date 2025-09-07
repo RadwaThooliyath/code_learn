@@ -44,7 +44,6 @@ class PaymentService {
         };
       }
       
-      print("💳 ${PaymentConstants.keyStatus}");
       // First get course pricing
       final pricing = await _enrollmentService.getCoursePricing(course.id);
       if (pricing == null) {
@@ -54,7 +53,6 @@ class PaymentService {
         };
       }
 
-      print("💰 Course pricing: Free=${pricing.isFree}, Total=${pricing.totalAmount}");
 
       // Check if course is free
       if (pricing.isFree) {
@@ -64,7 +62,6 @@ class PaymentService {
 
       // Calculate amount in paise
       final amountInPaise = (pricing.totalAmountAsDouble * 100).toInt();
-      print("💱 Amount calculation: ${pricing.totalAmountAsDouble} * 100 = $amountInPaise paise");
 
       // Setup payment options for Razorpay
       var options = <String, dynamic>{
@@ -91,12 +88,10 @@ class PaymentService {
         }
       };
 
-      print("🔧 Razorpay options prepared: ${options.keys.toList()}");
 
       // Return a Future that completes when payment is done
       return await _processPayment(options, course.id);
     } catch (e) {
-      print("❌ Error initiating payment: $e");
       return {
         'success': false,
         'message': 'Failed to initiate payment: ${e.toString()}',
@@ -110,7 +105,6 @@ class PaymentService {
 
     // Set up callbacks
     _onPaymentSuccess = (PaymentSuccessResponse response) async {
-      print("✅ Payment successful: ${response.paymentId}");
       
       try {
         // Complete the purchase on the backend
@@ -131,7 +125,6 @@ class PaymentService {
     };
 
     _onPaymentError = (PaymentFailureResponse response) {
-      print("❌ Payment failed: ${response.code} - ${response.message}");
       completer.complete({
         'success': false,
         'message': 'Payment failed: ${response.message}',
@@ -140,7 +133,6 @@ class PaymentService {
     };
 
     _onExternalWallet = (ExternalWalletResponse response) {
-      print("📱 External wallet selected: ${response.walletName}");
       // Handle external wallet if needed
     };
 

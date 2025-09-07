@@ -40,7 +40,6 @@ class UserProfileService {
             response = await request();
           }
         } catch (e) {
-          print('Token refresh failed: $e');
         }
       }
     }
@@ -62,12 +61,9 @@ class UserProfileService {
         final data = jsonDecode(response.body);
         return User.fromJson(data);
       } else {
-        print('Failed to get user profile: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Error getting user profile: $e');
       return null;
     }
   }
@@ -96,12 +92,9 @@ class UserProfileService {
         final data = jsonDecode(response.body);
         return User.fromJson(data);
       } else {
-        print('Failed to update user profile: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Error updating user profile: $e');
       return null;
     }
   }
@@ -128,12 +121,9 @@ class UserProfileService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print('Failed to change password: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return false;
       }
     } catch (e) {
-      print('Error changing password: $e');
       return false;
     }
   }
@@ -151,11 +141,9 @@ class UserProfileService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        print('Failed to get user statistics: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Error getting user statistics: $e');
       return null;
     }
   }

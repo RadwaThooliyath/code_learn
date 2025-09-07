@@ -312,28 +312,55 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
         return shouldExit ?? false;
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.logoLightGray,
         appBar: AppBar(
           title: Text(
             widget.quiz.title,
-            style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.logoBrightBlue,
           iconTheme: const IconThemeData(color: Colors.white),
+          elevation: 0,
           actions: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
-                color: _remainingTimeInSeconds < 300 ? Colors.red : Colors.white,
-                borderRadius: BorderRadius.circular(8),
+                color: _remainingTimeInSeconds < 300 
+                    ? AppColors.brightPinkCrayola 
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: Text(
-                _formatTime(_remainingTimeInSeconds),
-                style: TextStyle(
-                  color: _remainingTimeInSeconds < 300 ? Colors.white : AppColors.logoBrightBlue,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.timer,
+                    size: 16,
+                    color: _remainingTimeInSeconds < 300 
+                        ? Colors.white 
+                        : AppColors.logoBrightBlue,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _formatTime(_remainingTimeInSeconds),
+                    style: TextStyle(
+                      color: _remainingTimeInSeconds < 300 
+                          ? Colors.white 
+                          : AppColors.logoBrightBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -342,28 +369,77 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
           children: [
             // Progress indicator
             Container(
-              padding: const EdgeInsets.all(16),
-              color: AppColors.champagnePink,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.logoBrightBlue.withValues(alpha: 0.1),
+                    AppColors.logoGreen.withValues(alpha: 0.1),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Question ${_currentQuestionIndex + 1} of ${widget.quiz.questions.length}',
-                        style: const TextStyle(color: Colors.black, fontSize: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Question ${_currentQuestionIndex + 1} of ${widget.quiz.questions.length}',
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Progress: ${((_currentQuestionIndex + 1) / widget.quiz.questions.length * 100).toStringAsFixed(0)}%',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${widget.quiz.questions[_currentQuestionIndex].points} point${widget.quiz.questions[_currentQuestionIndex].points != 1 ? 's' : ''}',
-                        style: const TextStyle(color: Colors.black54, fontSize: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.logoGreen,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${widget.quiz.questions[_currentQuestionIndex].points} point${widget.quiz.questions[_currentQuestionIndex].points != 1 ? 's' : ''}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: (_currentQuestionIndex + 1) / widget.quiz.questions.length,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.logoBrightBlue),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: (_currentQuestionIndex + 1) / widget.quiz.questions.length,
+                      backgroundColor: Colors.grey[200],
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.logoGreen),
+                      minHeight: 6,
+                    ),
                   ),
                 ],
               ),
@@ -388,15 +464,15 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
             
             // Navigation and question overview
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.champagnePink,
+                color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.2),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, -3),
+                    color: Colors.black.withValues(alpha: 0.1),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: const Offset(0, -4),
                   ),
                 ],
               ),
@@ -413,28 +489,63 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                       
                       return GestureDetector(
                         onTap: () => _goToQuestion(index),
-                        child: Container(
-                          width: 32,
-                          height: 32,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 36,
+                          height: 36,
+                          margin: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
-                            color: index == _currentQuestionIndex
-                                ? AppColors.logoBrightBlue
+                            gradient: index == _currentQuestionIndex
+                                ? LinearGradient(
+                                    colors: [AppColors.logoBrightBlue, AppColors.logoGreen],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
                                 : isAnswered
-                                    ? Colors.green
-                                    : Colors.grey[300],
+                                    ? LinearGradient(
+                                        colors: [AppColors.logoGreen, AppColors.logoGreen.withValues(alpha: 0.8)],
+                                      )
+                                    : null,
+                            color: index == _currentQuestionIndex || isAnswered 
+                                ? null 
+                                : Colors.grey[200],
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: index == _currentQuestionIndex
+                                  ? AppColors.logoBrightBlue
+                                  : isAnswered
+                                      ? AppColors.logoGreen
+                                      : Colors.grey[400]!,
+                              width: index == _currentQuestionIndex ? 2 : 1,
+                            ),
+                            boxShadow: index == _currentQuestionIndex || isAnswered ? [
+                              BoxShadow(
+                                color: (index == _currentQuestionIndex 
+                                    ? AppColors.logoBrightBlue 
+                                    : AppColors.logoGreen).withValues(alpha: 0.3),
+                                spreadRadius: 1,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ] : null,
                           ),
                           child: Center(
-                            child: Text(
-                              '${index + 1}',
-                              style: TextStyle(
-                                color: index == _currentQuestionIndex || isAnswered
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
+                            child: isAnswered && index != _currentQuestionIndex
+                                ? Icon(
+                                    Icons.check,
+                                    size: 16,
+                                    color: Colors.white,
+                                  )
+                                : Text(
+                                    '${index + 1}',
+                                    style: TextStyle(
+                                      color: index == _currentQuestionIndex || isAnswered
+                                          ? Colors.white
+                                          : Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                           ),
                         ),
                       );
@@ -506,20 +617,63 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
 
   Widget _buildQuestionCard(QuizQuestion question) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Card(
-        color: AppColors.champagnePink,
-        elevation: 2,
+      padding: const EdgeInsets.all(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              spreadRadius: 2,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.logoBrightBlue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.quiz,
+                      color: AppColors.logoBrightBlue,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Question ${_currentQuestionIndex + 1}',
+                      style: TextStyle(
+                        color: AppColors.logoBrightBlue,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
               Text(
                 question.questionText,
-                style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  height: 1.4,
+                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               
               if (question.questionType == 'multiple_choice')
                 ..._buildMultipleChoiceOptions(question),
@@ -534,52 +688,101 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
   }
 
   List<Widget> _buildMultipleChoiceOptions(QuizQuestion question) {
-    return question.choices.map((choice) {
+    return question.choices.asMap().entries.map((entry) {
+      final index = entry.key;
+      final choice = entry.value;
       final isSelected = _selectedAnswers[question.id]?.contains(choice.id) == true;
+      final optionLetter = String.fromCharCode(65 + index); // A, B, C, D...
       
       return Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        child: GestureDetector(
-          onTap: () => _selectAnswer(question.id, choice.id),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: isSelected ? AppColors.logoBrightBlue : Colors.grey[300]!,
-                width: isSelected ? 2 : 1,
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _selectAnswer(question.id, choice.id),
+            borderRadius: BorderRadius.circular(12),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: isSelected 
+                    ? LinearGradient(
+                        colors: [
+                          AppColors.logoBrightBlue.withValues(alpha: 0.1),
+                          AppColors.logoGreen.withValues(alpha: 0.05),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
+                border: Border.all(
+                  color: isSelected ? AppColors.logoBrightBlue : Colors.grey[300]!,
+                  width: isSelected ? 2 : 1,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: isSelected ? null : AppColors.logoLightGray,
+                boxShadow: isSelected ? [
+                  BoxShadow(
+                    color: AppColors.logoBrightBlue.withValues(alpha: 0.2),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ] : null,
               ),
-              borderRadius: BorderRadius.circular(8),
-              color: isSelected ? AppColors.logoBrightBlue.withValues(alpha: 0.1) : Colors.white,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected ? AppColors.logoBrightBlue : Colors.grey[400]!,
-                      width: 2,
+              child: Row(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected ? AppColors.logoBrightBlue : Colors.white,
+                      border: Border.all(
+                        color: isSelected ? AppColors.logoBrightBlue : Colors.grey[400]!,
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          spreadRadius: 1,
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
                     ),
-                    color: isSelected ? AppColors.logoBrightBlue : Colors.white,
+                    child: Center(
+                      child: Text(
+                        optionLetter,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : AppColors.logoBrightBlue,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
-                  child: isSelected
-                      ? const Icon(
-                          Icons.check,
-                          size: 14,
-                          color: Colors.white,
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    choice.choiceText,
-                    style: const TextStyle(color: Colors.black, fontSize: 16),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      choice.choiceText,
+                      style: TextStyle(
+                        color: isSelected ? Colors.black87 : Colors.black87,
+                        fontSize: 16,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        height: 1.4,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  if (isSelected)
+                    Icon(
+                      Icons.check_circle,
+                      color: AppColors.logoGreen,
+                      size: 20,
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -588,17 +791,55 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
   }
 
   Widget _buildTextAnswerField(QuizQuestion question) {
-    return TextFormField(
-      onChanged: (value) => _setTextAnswer(question.id, value),
-      maxLines: 5,
-      decoration: InputDecoration(
-        hintText: 'Enter your answer here...',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        onChanged: (value) => _setTextAnswer(question.id, value),
+        maxLines: 5,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.black87,
+          height: 1.4,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.logoBrightBlue, width: 2),
+        decoration: InputDecoration(
+          hintText: 'Type your answer here...',
+          hintStyle: TextStyle(
+            color: Colors.grey[500],
+            fontSize: 16,
+          ),
+          filled: true,
+          fillColor: AppColors.logoLightGray,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.logoBrightBlue, width: 2),
+          ),
+          contentPadding: const EdgeInsets.all(16),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Icon(
+              Icons.edit_note,
+              color: AppColors.logoBrightBlue,
+              size: 20,
+            ),
+          ),
         ),
       ),
     );

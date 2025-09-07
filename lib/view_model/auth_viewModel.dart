@@ -12,6 +12,7 @@ class AuthViewModel extends ChangeNotifier {
   bool _isInitialized = false;
   String _error = "";
   bool _isLoadingProfile = false;
+  Map<String, String> _fieldErrors = {};
 
   User? get user => _user;
   bool get isLoading => _isLoading;
@@ -19,6 +20,7 @@ class AuthViewModel extends ChangeNotifier {
   String get error => _error;
   bool get isAuthenticated => _user != null;
   bool get isLoadingProfile => _isLoadingProfile;
+  Map<String, String> get fieldErrors => _fieldErrors;
 
   void _setLoading(bool loading) {
     _isLoading = loading;
@@ -30,22 +32,30 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _setFieldErrors(Map<String, String> fieldErrors) {
+    _fieldErrors = fieldErrors;
+    notifyListeners();
+  }
+
+  void _clearErrors() {
+    _error = "";
+    _fieldErrors = {};
+    notifyListeners();
+  }
+
   void _setUser(User? user) {
     _user = user;
     notifyListeners();
   }
 
   Future<void> checkAuthStatus() async {
-    print("🔍 Checking authentication status...");
     final startTime = DateTime.now();
     
     try {
       final isLoggedIn = await _authService.isLoggedIn();
-      print("📱 Is logged in: $isLoggedIn");
       
       if (isLoggedIn) {
         final userData = await StorageService.getUserData();
-        print("👤 User data: $userData");
         
         if (userData['userId'] != null && userData['name'] != null) {
           final user = User(
@@ -55,16 +65,12 @@ class AuthViewModel extends ChangeNotifier {
             role: null,
           );
           _setUser(user);
-          print("✅ User restored: ${user.name} (${user.email ?? 'No email'})");
         } else {
-          print("❌ Incomplete user data (missing userId or name), clearing storage");
           await StorageService.clearAllData();
         }
       } else {
-        print("❌ No valid token found");
       }
     } catch (e) {
-      print("💥 Error checking auth status: $e");
       await StorageService.clearAllData();
     }
     
@@ -74,29 +80,50 @@ class AuthViewModel extends ChangeNotifier {
     
     if (elapsed < minSplashDuration) {
       final remainingTime = minSplashDuration - elapsed;
-      print("⏰ Waiting additional ${remainingTime}ms for branding display");
       await Future.delayed(Duration(milliseconds: remainingTime));
     }
     
     _isInitialized = true;
-    print("✅ Auth initialization complete. Authenticated: $isAuthenticated");
     notifyListeners();
   }
 
   Future<bool> login(String email, String password) async {
     _setLoading(true);
-    _setError("");
+    _clearErrors();
     try {
       final loggedInUser = await _authService.login(email, password);
       if (loggedInUser != null) {
         _setUser(loggedInUser);
         return true;
       } else {
-        _setError("Invalid credentials or failed to login");
+        _setError("Login failed. Please try again");
         return false;
       }
     } catch (e) {
-      _setError("Login failed: $e");
+      print('🔥 AUTH VIEWMODEL - Exception caught: $e');
+      print('🔥 AUTH VIEWMODEL - Exception type: ${e.runtimeType}');
+      
+      if (e is LoginException) {
+        print('🔥 AUTH VIEWMODEL - LoginException message: "${e.message}"');
+        print('🔥 AUTH VIEWMODEL - LoginException fieldErrors: ${e.fieldErrors}');
+        
+        // Handle field-specific errors from LoginException
+        if (e.fieldErrors != null && e.fieldErrors!.isNotEmpty) {
+          print('🔥 AUTH VIEWMODEL - Setting field errors: ${e.fieldErrors}');
+          _setFieldErrors(e.fieldErrors!);
+          // Don't set general error when we have field-specific errors
+        } else if (e.message.isNotEmpty) {
+          print('🔥 AUTH VIEWMODEL - Setting general error: "${e.message}"');
+          _setError(e.message);
+        }
+      } else {
+        // Extract the meaningful error message from other exceptions
+        String errorMessage = e.toString();
+        if (errorMessage.startsWith('Exception: ')) {
+          errorMessage = errorMessage.substring(11); // Remove "Exception: " prefix
+        }
+        _setError(errorMessage);
+      }
       return false;
     } finally {
       _setLoading(false);
@@ -144,7 +171,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   void clearError() {
-    _setError("");
+    _clearErrors();
   }
 
   Future<void> refreshUserProfile() async {
@@ -159,7 +186,6 @@ class AuthViewModel extends ChangeNotifier {
         _setUser(profileData);
       }
     } catch (e) {
-      print('Error refreshing user profile: $e');
     } finally {
       _isLoadingProfile = false;
       notifyListeners();
@@ -189,7 +215,6 @@ class AuthViewModel extends ChangeNotifier {
       }
       return false;
     } catch (e) {
-      print('Error updating profile: $e');
       return false;
     } finally {
       _isLoadingProfile = false;
@@ -215,8 +240,26 @@ class AuthViewModel extends ChangeNotifier {
         confirmNewPassword: confirmNewPassword,
       );
     } catch (e) {
-      print('Error changing password: $e');
       return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      final result = await _authService.deleteAccount();
+      
+      if (result['success']) {
+        // Clear user data and state after successful deletion
+        _setUser(null);
+        _setError("");
+      }
+      
+      return result;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to delete account: $e'
+      };
     }
   }
 }

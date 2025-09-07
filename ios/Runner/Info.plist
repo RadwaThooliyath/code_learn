@@ -45,5 +45,70 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Network permissions -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
+	
+	<!-- File access permissions -->
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>This app needs access to documents folder to save and manage course materials and downloads.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>This app needs access to downloads folder to save course materials and resources.</string>
+	
+	<!-- Photo library permissions (for future features) -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app may need access to your photo library to save screenshots or images from courses.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app may need to save images from course content to your photo library.</string>
+	
+	<!-- Camera and microphone permissions (for future features) -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app may need camera access for profile pictures or future interactive features.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app may need microphone access for audio recording in future features.</string>
+	
+	<!-- Location permission (for analytics if needed) -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app may use your location to provide region-specific content and improve your learning experience.</string>
+	
+	<!-- Background processing -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>background-processing</string>
+		<string>background-fetch</string>
+	</array>
+	
+	<!-- URL Schemes for deep linking and payments -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>uptrail.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>uptrail</string>
+				<string>https</string>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- Prevent app from being backed up to iCloud -->
+	<key>NSSupportsAutomaticTermination</key>
+	<true/>
+	<key>NSSupportsSuddenTermination</key>
+	<true/>
+	
+	<!-- Screen recording prevention -->
+	<key>UIFileSharingEnabled</key>
+	<false/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<false/>
+	
 </dict>
 </plist>

@@ -34,10 +34,12 @@ class _AuthenticatedImageState extends State<AuthenticatedImage> {
 
   Future<void> _loadImage() async {
     try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+          _error = null;
+        });
+      }
 
       final token = await StorageService.getToken();
       final headers = <String, String>{
@@ -45,8 +47,7 @@ class _AuthenticatedImageState extends State<AuthenticatedImage> {
         if (token != null) 'Authorization': 'Bearer $token',
       };
 
-      print("🔐 Loading authenticated image: ${widget.imageUrl}");
-      print("🔑 Using token: ${token != null ? 'YES' : 'NO'}");
+
 
       final response = await http.get(
         Uri.parse(widget.imageUrl),
@@ -58,19 +59,15 @@ class _AuthenticatedImageState extends State<AuthenticatedImage> {
           _imageBytes = response.bodyBytes;
           _isLoading = false;
         });
-        print("✅ Image loaded successfully");
+
       } else if (response.statusCode == 404) {
-        print("📁 Image not found on server - this is a backend configuration issue");
-        print("🔧 Possible solutions:");
-        print("   1. Check if images are uploaded to correct server directory");
-        print("   2. Verify web server allows access to /codelearnmedia/ path");
-        print("   3. Update API to return correct image URLs");
+
         throw Exception('Image not found (404) - Backend issue');
       } else {
         throw Exception('HTTP ${response.statusCode}: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print("❌ Authenticated image load error: $e");
+
       setState(() {
         _error = e;
         _isLoading = false;

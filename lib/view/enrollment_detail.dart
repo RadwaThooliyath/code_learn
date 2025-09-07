@@ -32,6 +32,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
   final QuizService _quizService = QuizService();
   
   List<PaymentRecord> _paymentRecords = [];
+  List<Installment> _loadedInstallments = []; // Local state for installments
   Course? _courseDetail;
   Map<int, List<Assignment>> _moduleAssignments = {};
   Map<int, List<Quiz>> _moduleQuizzes = {};
@@ -68,7 +69,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
       final payments = await _enrollmentService.getEnrollmentPayments(
         widget.enrollment.id,
       );
-
+      
       setState(() {
         _paymentRecords = payments;
         _isLoading = false;
@@ -88,14 +89,14 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
       );
       
       if (installments.isNotEmpty) {
+        
         setState(() {
-          // Update the enrollment object with the loaded installments
-          widget.enrollment.installments?.clear();
-          widget.enrollment.installments?.addAll(installments);
+          // Store installments in local state
+          _loadedInstallments = installments;
         });
       }
     } catch (e) {
-      print("⚠️ Failed to load installment plans: $e");
+      // Failed to load installment plans
     }
   }
 
@@ -105,16 +106,11 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
         _isLoadingCourse = true;
       });
 
-      print("🔍 Checking enrollment data for modules...");
-      print("🔍 Enrollment courseModules: ${widget.enrollment.courseModules}");
-      
       // Try to get course detail from the proper API first
-      print("📚 Trying to get course detail with modules from: /api/courses/${widget.enrollment.courseId}/");
       
       try {
         final courseDetail = await _courseService.getCourseDetail(widget.enrollment.courseId);
         if (courseDetail != null) {
-          print("✅ Got course detail with ${courseDetail.modules?.length ?? 0} modules");
           setState(() {
             _courseDetail = courseDetail;
           });
@@ -122,18 +118,14 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
           // Load assignments and quizzes for each module if available
           if (courseDetail.modules != null) {
             for (final module in courseDetail.modules!) {
-              print("📚 Loading content for module: ${module.title}");
               await _loadModuleAssignments(module.id);
               await _loadModuleQuizzes(module.id);
             }
           }
         }
       } catch (e) {
-        print("❌ Course detail API failed: $e");
-        
         // Check if we have modules in the enrollment data as fallback
         if (widget.enrollment.courseModules != null && widget.enrollment.courseModules!.isNotEmpty) {
-          print("✅ Found modules in enrollment data: ${widget.enrollment.courseModules!.length} modules");
           
           // Parse modules from enrollment data
           final modules = widget.enrollment.courseModules!
@@ -156,7 +148,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
             await _loadModuleQuizzes(module.id);
           }
         } else {
-          print("⚠️ No modules in enrollment data either, trying enrolled courses API...");
           
           // Final fallback: Try to get enrolled courses and find this course
           try {
@@ -166,7 +157,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
               orElse: () => throw Exception("Course not found in enrolled courses"),
             );
             
-            print("✅ Found course in enrolled courses with ${matchingCourse.modules?.length ?? 0} modules");
             setState(() {
               _courseDetail = matchingCourse;
             });
@@ -179,9 +169,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
               }
             }
           } catch (fallbackError) {
-            print("❌ All fallbacks failed: $fallbackError");
             // Create a minimal course object with just the basic info we have
-            // But also try to manually load assignments and quizzes by trying common module IDs
             setState(() {
               _courseDetail = Course(
                 id: widget.enrollment.courseId,
@@ -193,7 +181,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
             });
             
             // Try to load content by guessing module IDs or using course ID as module ID
-            print("🔍 Trying to load assignments/quizzes directly...");
             await _tryLoadContentDirectly();
           }
         }
@@ -203,7 +190,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
         _isLoadingCourse = false;
       });
     } catch (e) {
-      print("⚠️ Failed to load course content: $e");
       setState(() {
         _isLoadingCourse = false;
       });
@@ -217,7 +203,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
         _moduleAssignments[moduleId] = assignments;
       });
     } catch (e) {
-      print("⚠️ Failed to load assignments for module $moduleId: $e");
       setState(() {
         _moduleAssignments[moduleId] = [];
       });
@@ -236,7 +221,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
         await _loadQuizPassStatus(quiz.id);
       }
     } catch (e) {
-      print("⚠️ Failed to load quizzes for module $moduleId: $e");
       setState(() {
         _moduleQuizzes[moduleId] = [];
       });
@@ -278,7 +262,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
         _canRetakeQuiz[quizId] = canRetake;
       });
     } catch (e) {
-      print("⚠️ Failed to load quiz pass status for quiz $quizId: $e");
+      // Failed to load quiz pass status
     }
   }
 
@@ -301,13 +285,12 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
       widget.enrollment.courseId + 100, // 103
     ]);
 
-    print("🔍 Trying possible module IDs: ${possibleModuleIds.take(10).toList()}... (${possibleModuleIds.length} total)");
+    // Try possible module IDs
     
     bool foundContent = false;
     
     for (final moduleId in possibleModuleIds) {
       try {
-        print("🔍 Trying module ID: $moduleId");
         
         List<Assignment> assignments = [];
         List<Quiz> quizzes = [];
@@ -316,31 +299,28 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
         try {
           assignments = await _assignmentService.getModuleAssignments(moduleId);
           if (assignments.isNotEmpty) {
-            print("✅ Found ${assignments.length} assignments for module $moduleId");
             setState(() {
               _moduleAssignments[moduleId] = assignments;
             });
           }
         } catch (e) {
-          print("  No assignments for module $moduleId");
+          // No assignments for this module
         }
         
         // Try to load quizzes for this module ID
         try {
           quizzes = await _quizService.getModuleQuizzes(moduleId);
           if (quizzes.isNotEmpty) {
-            print("✅ Found ${quizzes.length} quizzes for module $moduleId");
             setState(() {
               _moduleQuizzes[moduleId] = quizzes;
             });
           }
         } catch (e) {
-          print("  No quizzes for module $moduleId");
+          // No quizzes for this module
         }
         
         // If we found content, create a module for display
         if (assignments.isNotEmpty || quizzes.isNotEmpty) {
-          print("🎉 Found content! Creating module for ID $moduleId");
           
           final fakeModule = Module(
             id: moduleId,
@@ -369,38 +349,19 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
     }
     
     if (!foundContent) {
-      print("❌ No content found in any of the ${possibleModuleIds.length} module IDs tried");
-      print("💡 This might indicate:");
-      print("   1. Module IDs follow a different pattern");
-      print("   2. Assignment/Quiz APIs require different authentication");
-      print("   3. Content is stored differently for team enrollments");
-      
-      // Also try to get user's assignment submissions to see if we can find assignment IDs
+      // No content found - try to get user's assignment submissions to find content
       try {
-        print("🔍 Trying to get user's assignment submissions...");
         final submissions = await _assignmentService.getMyAssignmentSubmissions();
-        if (submissions.isNotEmpty) {
-          print("✅ Found ${submissions.length} assignment submissions");
-          for (final submission in submissions) {
-            print("  - Assignment: ${submission.assignmentTitle} (ID: ${submission.assignment})");
-          }
-        }
+        // Process submissions if found
       } catch (e) {
-        print("❌ Could not get assignment submissions: $e");
+        // Could not get assignment submissions
       }
       
-      // Try to get user's quiz attempts
       try {
-        print("🔍 Trying to get user's quiz attempts...");
         final attempts = await _quizService.getMyQuizAttempts();
-        if (attempts.isNotEmpty) {
-          print("✅ Found ${attempts.length} quiz attempts");
-          for (final attempt in attempts) {
-            print("  - Quiz: ${attempt.quizTitle} (ID: ${attempt.quiz})");
-          }
-        }
+        // Process attempts if found
       } catch (e) {
-        print("❌ Could not get quiz attempts: $e");
+        // Could not get quiz attempts
       }
     }
   }
@@ -411,7 +372,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          widget.enrollment.courseName,
+          "Payment Details",
           style: AppTextStyle.headline2,
         ),
         backgroundColor: AppColors.background,
@@ -422,34 +383,24 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
             onPressed: _loadPaymentRecords,
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppColors.logoBrightBlue,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white60,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.info_outline),
-              text: "Overview",
-            ),
-            Tab(
-              icon: Icon(Icons.school),
-              text: "Content",
-            ),
-            Tab(
-              icon: Icon(Icons.payment),
-              text: "Payments",
-            ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCourseInfo(),
+            const SizedBox(height: 24),
+            _buildPaymentSummary(),
+            const SizedBox(height: 24),
+            if (_loadedInstallments.isNotEmpty ||
+                (widget.enrollment.installments != null &&
+                 widget.enrollment.installments!.isNotEmpty))
+              _buildInstallmentOverview(),
+            const SizedBox(height: 24),
+            _buildPaymentHistorySection(),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildOverviewTab(),
-          _buildContentTab(),
-          _buildPaymentsTab(),
-        ],
       ),
     );
   }
@@ -1367,7 +1318,10 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
   }
 
   Widget _buildInstallmentOverview() {
-    final installments = widget.enrollment.installments!;
+    // Use loaded installments from local state, fallback to widget data
+    final installments = _loadedInstallments.isNotEmpty 
+        ? _loadedInstallments 
+        : widget.enrollment.installments ?? [];
     
     return Card(
       color: AppColors.white,
@@ -1533,7 +1487,6 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
   }
 
   Color _getEnrollmentStatusColor(String status) {
-
     switch (status.toLowerCase()) {
       case 'active':
         return Colors.green;
@@ -1573,6 +1526,248 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
       default:
         return Colors.grey;
     }
+  }
+
+  Widget _buildPaymentHistorySection() {
+    if (_isLoading) {
+      return Card(
+        color: AppColors.white,
+        child: const Padding(
+          padding: EdgeInsets.all(32),
+          child: Center(
+            child: CircularProgressIndicator(
+              color: AppColors.logoBrightBlue,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Card(
+        color: AppColors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.red,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Error loading payment history",
+                style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                style: const TextStyle(color: Colors.black54, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadPaymentRecords,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.logoBrightBlue,
+                ),
+                child: const Text("Retry"),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final allPayments = _paymentRecords.isNotEmpty 
+        ? _paymentRecords 
+        : widget.enrollment.payments;
+
+    if (allPayments.isEmpty) {
+      return Card(
+        color: AppColors.white,
+        child: const Padding(
+          padding: EdgeInsets.all(32),
+          child: Column(
+            children: [
+              Icon(
+                Icons.payment_outlined,
+                size: 48,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                "No payment records found",
+                style: TextStyle(color: Colors.black87, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      color: AppColors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.history_rounded,
+                  color: AppColors.logoBrightBlue,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  "Payment History",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  "${allPayments.length} transactions",
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ...allPayments.map((payment) => _buildPaymentHistoryItem(payment)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentHistoryItem(PaymentRecord payment) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "₹${payment.amount.toStringAsFixed(0)}",
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getPaymentStatusColor(payment.status).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  payment.status.toUpperCase(),
+                  style: TextStyle(
+                    color: _getPaymentStatusColor(payment.status),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                Icons.access_time_rounded,
+                size: 14,
+                color: Colors.black54,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                _formatDate(payment.paymentDate),
+                style: const TextStyle(color: Colors.black54, fontSize: 13),
+              ),
+              const Spacer(),
+              Icon(
+                Icons.payment_rounded,
+                size: 14,
+                color: Colors.black54,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                payment.paymentMethod.toUpperCase(),
+                style: const TextStyle(color: Colors.black54, fontSize: 13),
+              ),
+            ],
+          ),
+          if (payment.transactionId != null) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(
+                  Icons.receipt_long_outlined,
+                  size: 14,
+                  color: Colors.black54,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    "Transaction ID: ${payment.transactionId}",
+                    style: const TextStyle(color: Colors.black54, fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (payment.notes != null && payment.notes!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.note_outlined,
+                    size: 14,
+                    color: Colors.blue[600],
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      payment.notes!,
+                      style: TextStyle(
+                        color: Colors.blue[700],
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   String _formatDate(DateTime date) {

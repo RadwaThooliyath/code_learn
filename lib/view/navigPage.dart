@@ -7,14 +7,21 @@ import 'package:uptrail/view/profile.dart';
 import 'package:flutter/material.dart';
 
 class Navigpage extends StatefulWidget {
-  const Navigpage({super.key});
+  final int initialIndex;
+  const Navigpage({super.key, this.initialIndex = 0});
 
   @override
   State<Navigpage> createState() => _NavigpageState();
 }
 
 class _NavigpageState extends State<Navigpage> {
-  int selectedIndex = 0;
+  late int selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialIndex;
+  }
 
   final List<Widget> pages = [
     Homepage(),
@@ -40,7 +47,7 @@ class _NavigpageState extends State<Navigpage> {
         height: 90,
         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
         decoration: BoxDecoration(
-          color: AppColors.card2.withValues(alpha: 0.5),
+          color: AppColors.card2.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -58,7 +65,7 @@ class _NavigpageState extends State<Navigpage> {
             children: [
               _buildHotstarNavItem(Icons.home_filled, "Home", 0),
               _buildHotstarNavItem(Icons.library_books, "My List", 1),
-              _buildHotstarNavItem(Icons.play_circle_fill, "Watch", 2),
+              _buildHotstarNavItem(Icons.monetization_on, "Payments", 2),
               _buildHotstarNavItem(Icons.group, "Teams", 3),
               _buildHotstarNavItem(Icons.person, "Profile", 4),
             ],

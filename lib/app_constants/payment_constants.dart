@@ -6,7 +6,7 @@ class PaymentConstants {
   static const String razorpayTestKeyId = 'rzp_test_ONh383HzmXB5Wf';
   
   // Live Keys (for production)
-  static const String razorpayLiveKeyId = 'rzp_live_YOUR_LIVE_KEY_HERE';
+  static const String razorpayLiveKeyId = 'rzp_live_RDTmTSlS55i5Zi';
   
   // Environment flag - set to false for production
   static const bool isTestMode = true;

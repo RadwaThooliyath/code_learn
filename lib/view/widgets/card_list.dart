@@ -67,7 +67,7 @@ class CourseHorizontalList extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: itemCount,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             itemBuilder: (context, index) {
               return CourseCard(
                 index: index,

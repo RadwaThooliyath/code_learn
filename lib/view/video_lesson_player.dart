@@ -4,7 +4,9 @@ import 'package:uptrail/app_constants/colors.dart';
 import 'package:uptrail/model/course_model.dart';
 import 'package:uptrail/services/course_service.dart';
 import 'package:uptrail/utils/app_text_style.dart';
+import 'package:uptrail/widgets/security_wrapper.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'widgets/lesson_resources.dart';
 
 class VideoLessonPlayer extends StatefulWidget {
   final Lesson lesson;
@@ -93,7 +95,6 @@ class _VideoLessonPlayerState extends State<VideoLessonPlayer> {
         completed: _completionPercentage >= 95,
       );
     } catch (e) {
-      print("Failed to update video progress: $e");
     } finally {
       setState(() {
         _isLoading = false;
@@ -109,7 +110,9 @@ class _VideoLessonPlayerState extends State<VideoLessonPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SecurityWrapper(
+      showSecurityInfo: true, // Show security info when first viewing lessons
+      child: Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
@@ -170,6 +173,10 @@ class _VideoLessonPlayerState extends State<VideoLessonPlayer> {
                       _buildProgressCard(),
                       const SizedBox(height: 16),
                       _buildLessonInfo(),
+                      LessonResourcesWidget(
+                        resourceUrl: widget.lesson.resourceFileUrl,
+                        lessonTitle: widget.lesson.title,
+                      ),
                     ],
                   ),
                 ),
@@ -178,6 +185,7 @@ class _VideoLessonPlayerState extends State<VideoLessonPlayer> {
           ],
         ),
       ),
+    ),
     );
   }
 

@@ -68,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen>
           color: AppColors.logoDarkTeal,
           gradient: LinearGradient(
 
-            colors: [AppColors.logoBrightBlue,AppColors.logoDarkTeal, ],
+            colors: [AppColors.logoGreen,AppColors.logoDarkTeal, ],
             begin: Alignment.bottomRight
           ),
         ),
@@ -96,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen>
                         );
                       },
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 16),
                     // Animated Text
                     AnimatedBuilder(
                       animation: _textAnimation,
@@ -107,16 +107,7 @@ class _SplashScreenState extends State<SplashScreen>
                             offset: Offset(0, 30 * (1 - _textAnimation.value)),
                             child: Column(
                               children: [
-                                const Text(
-                                  "Uptrail",
-                                  style: TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
+
                                 const Text(
                                   "Learn. Grow. Succeed.",
                                   style: TextStyle(

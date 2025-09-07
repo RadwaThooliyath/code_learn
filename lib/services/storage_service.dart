@@ -15,7 +15,6 @@ class StorageService {
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_tokenKey);
-    print("🔑 Retrieved token: ${token != null ? 'EXISTS (${token.substring(0, 10)}...)' : 'NULL'}");
     return token;
   }
 
@@ -30,7 +29,6 @@ class StorageService {
     if (email != null && email.isNotEmpty) {
       await prefs.setString(_userEmailKey, email);
     }
-    print("💾 Saved user data: ID=$userId, Name=$name, Email=$email");
   }
 
   static Future<Map<String, String?>> getUserData() async {
@@ -64,5 +62,10 @@ class StorageService {
   static Future<bool> isLoggedIn() async {
     final token = await getToken();
     return token != null && token.isNotEmpty;
+  }
+
+  // Alias method for consistency with auth service
+  static Future<void> clearAll() async {
+    await clearAllData();
   }
 }
