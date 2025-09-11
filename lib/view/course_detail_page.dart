@@ -15,6 +15,7 @@ import 'package:uptrail/view/video_lesson_player.dart';
 import 'package:uptrail/view/quiz_taking_page.dart';
 import 'package:uptrail/services/enrollment_service.dart';
 import 'package:uptrail/services/payment_service.dart';
+import 'package:uptrail/services/user_profile_service.dart';
 import 'package:uptrail/view/widgets/rating_widget.dart';
 import 'package:uptrail/view/widgets/rating_dialog.dart';
 import 'package:uptrail/view/checkout_summary_page.dart';
@@ -37,6 +38,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   final EnrollmentService _enrollmentService = EnrollmentService();
   final PaymentService _paymentService = PaymentService();
   final RatingService _ratingService = RatingService();
+  final UserProfileService _userProfileService = UserProfileService();
   
   Map<int, List<Assignment>> _moduleAssignments = {};
   Map<int, List<Quiz>> _moduleQuizzes = {};
@@ -134,25 +136,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         );
       }
       
-      // Find the quiz to get max attempts
-      Quiz? quiz;
-      for (final moduleQuizzes in _moduleQuizzes.values) {
-        quiz = moduleQuizzes.where((q) => q.id == quizId).firstOrNull;
-        if (quiz != null) break;
-      }
-      
-      bool canRetake = false;
-      if (quiz != null) {
-        // Can retake if:
-        // 1. Haven't passed and have attempts remaining, OR
-        // 2. Have passed but quiz allows retakes (some quizzes might allow this)
-        canRetake = (!hasPassed && attemptCount < quiz.maxAttempts);
-      }
-      
       setState(() {
         _quizPassedStatus[quizId] = hasPassed;
         _quizAttemptCounts[quizId] = attemptCount;
-        _canRetakeQuiz[quizId] = canRetake;
+        // Since attempt restrictions are removed, always allow retakes
+        _canRetakeQuiz[quizId] = true;
       });
     } catch (e) {
       // Failed to load quiz pass status
@@ -300,22 +288,24 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   Widget _buildCourseInfo() {
     return Card(
-      color: AppColors.white,
+      color: AppColors.champagnePink,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (widget.course.thumbnailUrl != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                  Container(
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+
                     child: Image.network(
                       widget.course.thumbnailUrl!,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
+                                         width: MediaQuery.of(context).size.width*0.75,
+                      height: 180,
+                      fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           width: 100,
@@ -334,48 +324,48 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     ),
                   ),
                 const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.course.title,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (widget.course.category != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.course.category!,
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      if (widget.course.isEnrolled == true)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            "ENROLLED",
-                            style: TextStyle(
-                              color: Colors.green,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
+
+              ],
+            ),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.course.title,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                if (widget.course.category != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.course.category!,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                if (widget.course.isEnrolled == true)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      "ENROLLED",
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
@@ -545,7 +535,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         child: Padding(
           padding: EdgeInsets.all(32),
           child: CircularProgressIndicator(
-            color: AppColors.logoBrightBlue,
+            color: AppColors.brightPinkCrayola,
           ),
         ),
       );
@@ -556,7 +546,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         child: Container(
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: AppColors.white.withValues(alpha: 0.05),
+            color: AppColors.champagnePink,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.1),
@@ -591,7 +581,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     final quizzes = _moduleQuizzes[module.id] ?? [];
     
     return Card(
-      color: AppColors.white,
+      color: AppColors.champagnePink,
       margin: const EdgeInsets.only(bottom: 16),
       child: ExpansionTile(
         title: Text(
@@ -612,7 +602,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           overflow: TextOverflow.ellipsis,
         ),
         leading: CircleAvatar(
-          backgroundColor: AppColors.logoBrightBlue,
+          backgroundColor: AppColors.brightPinkCrayola,
           child: Text(
             module.order.toString(),
             style: const TextStyle(
@@ -661,13 +651,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             ),
           ),
           const SizedBox(height: 8),
-          ...lessons.map((lesson) => Card(
-            color: Colors.white,
+          ...lessons.map((lesson) => Card(elevation: 5.0,
+            color: AppColors.white.withValues(alpha: 0.9),
             child: ListTile(
               dense: true,
               leading: Icon(
                 lesson.type == 'video' ? Icons.play_circle : Icons.article,
-                color: AppColors.logoBrightBlue,
+                color: AppColors.brightPinkCrayola,
               ),
               title: Text(
                 lesson.title,
@@ -804,112 +794,287 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             ),
           ),
           const SizedBox(height: 8),
-          ...quizzes.map((quiz) {
-            final isPassed = _quizPassedStatus[quiz.id] ?? false;
-            final attemptCount = _quizAttemptCounts[quiz.id] ?? 0;
-            final canRetake = _canRetakeQuiz[quiz.id] ?? (attemptCount < quiz.maxAttempts);
-            final canTakeQuiz = attemptCount == 0 || canRetake;
-            
-            return Container(
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              decoration: BoxDecoration(
-                color: isPassed ? Colors.green[50] : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-                border: isPassed ? Border.all(color: Colors.green[200]!, width: 1) : null,
-              ),
-              child: ListTile(
-                dense: true,
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isPassed ? Colors.green[100] : AppColors.logoBrightBlue.withValues(alpha: 0.1),
-                  ),
-                  child: Icon(
-                    isPassed ? Icons.check_circle : Icons.quiz_outlined,
-                    color: isPassed ? Colors.green[600] : AppColors.logoBrightBlue,
-                    size: 20,
-                  ),
-                ),
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        quiz.title,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: isPassed ? FontWeight.w600 : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    if (isPassed)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.green[600],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          "PASSED",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                subtitle: Text(
-                  "Questions: ${quiz.questions.length} • Points: ${quiz.maxPoints} • Attempts: $attemptCount/${quiz.maxAttempts}",
-                  style: const TextStyle(color: Colors.black54, fontSize: 12),
-                ),
-                trailing: Container(
-                  height: 36,
-                  child: canTakeQuiz 
-                    ? ElevatedButton.icon(
-                        onPressed: () => _startQuiz(quiz),
-                        icon: Icon(
-                          attemptCount > 0 ? Icons.refresh : Icons.play_arrow,
-                          size: 16,
-                        ),
-                        label: Text(
-                          attemptCount > 0 ? "Retry" : "Take Quiz",
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: attemptCount > 0 ? Colors.orange[600] : AppColors.logoBrightBlue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          elevation: 2,
-                        ),
-                      )
-                    : Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isPassed ? Colors.green[100] : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          isPassed ? "Completed" : "No attempts left",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isPassed ? Colors.green[700] : Colors.grey[600],
-                          ),
-                        ),
-                      ),
-                ),
-              ),
-            );
-          }),
+          ...quizzes.map((quiz) => _buildCustomQuizCard(quiz)),
           const Divider(),
         ],
       ),
+    );
+  }
+
+  Widget _buildCustomQuizCard(Quiz quiz) {
+    final isPassed = _quizPassedStatus[quiz.id] ?? false;
+    final attemptCount = _quizAttemptCounts[quiz.id] ?? 0;
+    // Since attempt restrictions are removed from backend, always allow quiz taking
+    final canTakeQuiz = true;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isPassed 
+          ? Colors.green[50] 
+          : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isPassed 
+            ? Colors.green[200]! 
+            : Colors.grey[300]!,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Responsive layout based on available width
+          final isSmallScreen = constraints.maxWidth < 350;
+          
+          if (isSmallScreen) {
+            // Stacked layout for small screens
+            return _buildStackedQuizLayout(quiz, isPassed, attemptCount, canTakeQuiz);
+          } else {
+            // Side-by-side layout for larger screens
+            return _buildSideBySideQuizLayout(quiz, isPassed, attemptCount, canTakeQuiz);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildStackedQuizLayout(Quiz quiz, bool isPassed, int attemptCount, bool canTakeQuiz) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header row with icon and status
+        Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isPassed 
+                  ? Colors.green[100] 
+                  : AppColors.logoBrightBlue.withValues(alpha: 0.15),
+              ),
+              child: Icon(
+                isPassed ? Icons.check_circle : Icons.quiz_outlined,
+                color: isPassed ? Colors.green[600] : AppColors.logoBrightBlue,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                quiz.title,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 15,
+                  fontWeight: isPassed ? FontWeight.w600 : FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isPassed)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.green[600],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  "PASSED",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Quiz details in a compact format
+        Wrap(
+          spacing: 12,
+          runSpacing: 6,
+          children: [
+            _buildCompactQuizStat(Icons.help_outline, "${quiz.questions.length}", "Questions"),
+            _buildCompactQuizStat(Icons.star_outline, "${quiz.maxPoints}", "Points"),
+            _buildCompactQuizStat(Icons.refresh, "$attemptCount", "Attempts"),
+          ],
+        ),
+        
+        const SizedBox(height: 14),
+        
+        // Action button at full width - always show since attempts are unlimited
+        SizedBox(
+          width: double.infinity,
+          height: 40,
+          child: ElevatedButton.icon(
+            onPressed: () => _startQuiz(quiz),
+            icon: Icon(
+              attemptCount > 0 ? Icons.refresh : Icons.play_arrow,
+              size: 16,
+            ),
+            label: Text(
+              attemptCount > 0 ? "Retake Quiz" : "Take Quiz",
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isPassed 
+                ? Colors.green[600] 
+                : (attemptCount > 0 ? Colors.orange[600] : AppColors.logoBrightBlue),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 2,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSideBySideQuizLayout(Quiz quiz, bool isPassed, int attemptCount, bool canTakeQuiz) {
+    return Row(
+      children: [
+        // Left side - Icon and content
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isPassed 
+              ? Colors.green[100] 
+              : AppColors.logoBrightBlue.withValues(alpha: 0.15),
+          ),
+          child: Icon(
+            isPassed ? Icons.check_circle : Icons.quiz_outlined,
+            color: isPassed ? Colors.green[600] : AppColors.logoBrightBlue,
+            size: 18,
+          ),
+        ),
+        
+        const SizedBox(width: 14),
+        
+        // Middle - Quiz info
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      quiz.title,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: isPassed ? FontWeight.w600 : FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (isPassed)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.green[600],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Text(
+                        "PASSED",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                "Questions: ${quiz.questions.length} • Points: ${quiz.maxPoints} • Attempts: $attemptCount",
+                style: const TextStyle(
+                  color: Colors.black54, 
+                  fontSize: 12,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(width: 12),
+        
+        // Right side - Action button (always show since attempts are unlimited)
+        ElevatedButton.icon(
+          onPressed: () => _startQuiz(quiz),
+          icon: Icon(
+            attemptCount > 0 ? Icons.refresh : Icons.play_arrow,
+            size: 14,
+          ),
+          label: Text(
+            attemptCount > 0 ? "Retake" : "Take Quiz",
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isPassed 
+              ? Colors.green[600] 
+              : (attemptCount > 0 ? Colors.orange[600] : AppColors.logoBrightBlue),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactQuizStat(IconData icon, String value, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: Colors.black54,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 2),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.black54,
+            fontSize: 11,
+          ),
+        ),
+      ],
     );
   }
 
@@ -1352,7 +1517,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          leading: Icon(icon, color: AppColors.logoBrightBlue),
+          leading: Icon(icon, color: AppColors.brightPinkCrayola),
           title: Text(
             title,
             style: const TextStyle(
@@ -1465,6 +1630,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         if (!_isLoadingRatings && (_userRatingStatus?.canRate == true || _userRatingStatus?.hasRated == true)) ...[
           Container(
             padding: const EdgeInsets.all(20),
+
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -1515,23 +1681,16 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                         child: ElevatedButton(
                           onPressed: _showRatingDialog,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.logoBrightBlue,
+                            backgroundColor: AppColors.brightPinkCrayola,
                             foregroundColor: Colors.white,
-                            elevation: 0,
-                            shadowColor: AppColors.logoBrightBlue.withValues(alpha: 0.3),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Row(
+                              borderRadius: BorderRadius.circular(12),),
+    ),
+                              child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                _userRatingStatus?.hasRated == true 
-                                    ? Icons.star_rate_rounded
-                                    : Icons.star_rate_rounded,
-                                size: 18,
-                              ),
+
                               const SizedBox(width: 8),
                               Text(
                                 _userRatingStatus?.hasRated == true 
@@ -1559,7 +1718,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.logoBrightBlue,
                             side: BorderSide(
-                              color: AppColors.logoBrightBlue,
+                              color: AppColors.brightPinkCrayola,
                               width: 1.5,
                             ),
                             backgroundColor: Colors.transparent,
@@ -1571,16 +1730,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.rate_review_rounded,
-                                size: 18,
-                              ),
                               const SizedBox(width: 8),
                               Text(
                                 _userRatingStatus?.hasReviewed == true 
                                     ? 'Update Review' 
                                     : 'Write Review',
                                 style: const TextStyle(
+                                  color: Colors.black,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -1648,7 +1804,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundColor: AppColors.logoBrightBlue,
+                        backgroundColor: AppColors.brightPinkCrayola,
                         child: Text(
                           rating.userName.isNotEmpty 
                               ? rating.userName[0].toUpperCase()
@@ -1746,14 +1902,19 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         return;
       }
 
+      // Get user profile for email and phone
+      final userProfile = await _userProfileService.getUserProfile();
+      final userEmail = userProfile?.email ?? 'user@example.com';
+      final userPhone = userProfile?.phoneNumber ?? userProfile?.phone ?? '+919876543210';
+
       // Navigate to checkout summary page
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
         MaterialPageRoute(
           builder: (context) => CheckoutSummaryPage(
             course: widget.course,
             pricing: pricing,
-            userEmail: 'user@example.com', // TODO: Get from user profile
-            userPhone: '+919876543210', // TODO: Get from user profile
+            userEmail: userEmail,
+            userPhone: userPhone,
           ),
         ),
       );

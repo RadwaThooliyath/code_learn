@@ -307,7 +307,7 @@ class _SelectedCoursesPageState extends State<SelectedCoursesPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.champagnePink,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: Colors.grey.withValues(alpha: 0.1),

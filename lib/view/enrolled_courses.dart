@@ -154,7 +154,7 @@ class _EnrolledCoursesPageState extends State<EnrolledCoursesPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.champagnePink,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -182,19 +182,7 @@ class _EnrolledCoursesPageState extends State<EnrolledCoursesPage> {
               // Course Header with Payment Badge
               Row(
                 children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppColors.logoBrightBlue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.receipt_long_outlined,
-                      color: AppColors.logoBrightBlue,
-                      size: 28,
-                    ),
-                  ),
+
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -321,7 +309,7 @@ class _EnrolledCoursesPageState extends State<EnrolledCoursesPage> {
                       Text(
                         "${paymentPercentage}% Complete",
                         style: TextStyle(
-                          color: AppColors.logoBrightBlue,
+                          color: AppColors.green1,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -345,8 +333,8 @@ class _EnrolledCoursesPageState extends State<EnrolledCoursesPage> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  AppColors.logoBrightBlue,
-                                  AppColors.logoBrightBlue.withValues(alpha: 0.8),
+                                  AppColors.green1,
+                                  AppColors.green1.withValues(alpha: 0.8),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(4),

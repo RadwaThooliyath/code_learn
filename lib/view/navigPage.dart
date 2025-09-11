@@ -3,8 +3,9 @@ import 'package:uptrail/view/homePage.dart';
 import 'package:uptrail/view/my_courses.dart';
 import 'package:uptrail/view/enrolled_courses.dart';
 import 'package:uptrail/view/my_teams.dart';
-import 'package:uptrail/view/profile.dart';
+
 import 'package:flutter/material.dart';
+import 'package:uptrail/view/profile_new.dart';
 
 class Navigpage extends StatefulWidget {
   final int initialIndex;
@@ -111,7 +112,7 @@ class _NavigpageState extends State<Navigpage> {
                       curve: Curves.easeInOut,
                       child: Icon(
                         icon,
-                        color: isSelected ? Colors.white : Colors.grey[400],
+                        color: isSelected ? AppColors.brightPinkCrayola : Colors.grey[400],
                         size: isSelected ? 28 : 24,
                       ),
                     ),
@@ -139,7 +140,7 @@ class _NavigpageState extends State<Navigpage> {
                   width: isSelected ? 24 : 0,
                   height: 3,
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : Colors.transparent,
+                    color: isSelected ? AppColors.brightPinkCrayola : Colors.transparent,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

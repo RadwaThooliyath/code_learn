@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,12 +13,19 @@ class SecurityService {
 
   /// Initialize security features for the app
   Future<void> initializeSecurity() async {
+    // Skip security initialization in debug mode or on emulators
+    if (kDebugMode) {
+      debugPrint('🔒 Security features disabled in debug mode');
+      return;
+    }
+    
     try {
       await _enableScreenshotPrevention();
       await _setupScreenshotDetection();
       await _enableScreenRecordingPrevention();
     } catch (e) {
       debugPrint('Security initialization error: $e');
+      // Don't throw the error, just log it
     }
   }
 
@@ -35,6 +43,7 @@ class SecurityService {
       }
     } catch (e) {
       debugPrint('❌ Failed to enable screenshot prevention: $e');
+      // Silently continue - this is expected in development/emulator
     }
   }
 
@@ -66,6 +75,7 @@ class SecurityService {
       }
     } catch (e) {
       debugPrint('❌ Failed to setup screenshot detection: $e');
+      // This is expected in development/emulator - continue silently
     }
   }
 
@@ -96,7 +106,12 @@ class SecurityService {
       const platform = MethodChannel('com.uptrail.security/screenshot');
       await platform.invokeMethod('preventScreenshots');
     } catch (e) {
-      debugPrint('iOS screenshot prevention method channel error: $e');
+      if (kDebugMode) {
+        debugPrint('⚠️ iOS screenshot prevention not available in debug mode');
+      } else {
+        debugPrint('iOS screenshot prevention method channel error: $e');
+      }
+      rethrow;
     }
   }
 
@@ -107,7 +122,12 @@ class SecurityService {
       const platform = MethodChannel('com.uptrail.security/screenshot');
       await platform.invokeMethod('enableScreenshotPrevention');
     } catch (e) {
-      debugPrint('Android screenshot prevention method channel error: $e');
+      if (kDebugMode) {
+        debugPrint('⚠️ Android screenshot prevention not available in debug mode');
+      } else {
+        debugPrint('Android screenshot prevention method channel error: $e');
+      }
+      rethrow;
     }
   }
 

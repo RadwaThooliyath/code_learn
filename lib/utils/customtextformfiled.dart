@@ -48,10 +48,19 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   bool _obscureText = true;
 
   @override
+  void initState() {
+    super.initState();
+    // Set initial value in controller if provided
+    if (widget.value != null && widget.controller.text.isEmpty) {
+      widget.controller.text = widget.value!;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final themedata = Theme.of(context);
     return TextFormField(
-      initialValue: widget.value,
+      // Remove initialValue when using controller to avoid conflicts
       cursorColor: AppColors.champagnePink,
       readOnly: widget.readOnly,
       style: const TextStyle(
@@ -62,6 +71,9 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       maxLines: widget.maxlines,
       keyboardType: widget.type,
       controller: widget.controller,
+      // Add these properties to ensure proper keyboard behavior
+      autofocus: false,
+      enabled: !widget.readOnly,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.only(
           left: 20,
@@ -84,8 +96,12 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide(color: AppColors.robinEggBlue, width: 2)),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: Colors.red, width: 2),
         ),
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.obscureText

@@ -64,13 +64,9 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.logoDarkTeal,
-          gradient: LinearGradient(
+        decoration:  BoxDecoration(
+          color: AppColors.white,
 
-            colors: [AppColors.logoGreen,AppColors.logoDarkTeal, ],
-            begin: Alignment.bottomRight
-          ),
         ),
         child: Stack(
           children: [
@@ -90,13 +86,13 @@ class _SplashScreenState extends State<SplashScreen>
                           scale: _logoAnimation.value,
                           child: SvgPicture.asset(
                             'assets/logo/logo.svg',
-                            width: 120,
-                            height: 120,
+                            width: 100,
+                            height: 100,
                           ),
                         );
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     // Animated Text
                     AnimatedBuilder(
                       animation: _textAnimation,
@@ -112,14 +108,14 @@ class _SplashScreenState extends State<SplashScreen>
                                   "Learn. Grow. Succeed.",
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.white70,
+                                    color: Colors.black,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 const SizedBox(height: 48),
                                 const CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                                    Colors.black
                                   ),
                                   strokeWidth: 3,
                                 ),

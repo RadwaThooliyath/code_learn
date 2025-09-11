@@ -8,7 +8,7 @@ class AppTextStyle {
   );
 
   static const TextStyle headline2 = TextStyle(
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
     color: Colors.white,
   );

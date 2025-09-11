@@ -9,7 +9,7 @@ class PaymentConstants {
   static const String razorpayLiveKeyId = 'rzp_live_RDTmTSlS55i5Zi';
   
   // Environment flag - set to false for production
-  static const bool isTestMode = true;
+  static const bool isTestMode = false;
   
   // Get the appropriate key based on environment
   static String get razorpayKeyId {
@@ -17,7 +17,7 @@ class PaymentConstants {
   }
   
   // Payment configuration
-  static const String companyName = 'CodeLearn LMS';
+  static const String companyName = 'Uptrail LMS';
   static const String companyLogo = 'https://your-domain.com/logo.png'; // Optional
   static const String themeColor = '#3399cc';
   

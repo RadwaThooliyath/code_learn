@@ -166,14 +166,14 @@ class RatingDistribution extends StatelessWidget {
               const Icon(
                 Icons.star,
                 size: 16,
-                color: Colors.amber,
+                color: Colors.red,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Container(
                   height: 8,
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Colors.grey[50],
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: FractionallySizedBox(
@@ -181,7 +181,7 @@ class RatingDistribution extends StatelessWidget {
                     widthFactor: percentage,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: AppColors.logoBrightBlue,
+                        color: AppColors.green1,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -195,7 +195,7 @@ class RatingDistribution extends StatelessWidget {
                   count.toString(),
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.black54,
+                    color: Colors.black87,
                   ),
                   textAlign: TextAlign.end,
                 ),
@@ -225,6 +225,7 @@ class RatingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: AppColors.champagnePink,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -252,7 +253,7 @@ class RatingCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Column(
                     children: [
                       Text(
@@ -266,7 +267,7 @@ class RatingCard extends StatelessWidget {
                       StarRating(
                         rating: averageRating,
                         size: 24,
-                        activeColor: Colors.amber,
+                        activeColor: Colors.red,
                       ),
                       const SizedBox(height: 4),
                       Text(

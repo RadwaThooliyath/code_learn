@@ -94,27 +94,45 @@ class _CheckoutSummaryPageState extends State<CheckoutSummaryPage> {
           children: [
             Icon(
               success ? Icons.check_circle : Icons.error,
-              color: success ? Colors.green : Colors.red,
-              size: 32,
+              color: success ? AppColors.green1 : AppColors.coral,
+              size: 24,
             ),
             const SizedBox(width: 12),
-            Text(
-              success ? 'Payment Successful!' : 'Payment Failed',
-              style: TextStyle(
-                color: success ? Colors.green[700] : Colors.red[700],
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                success ? 'Payment Successful!' : 'Payment Failed',
+                style: TextStyle(
+                  color: success ? AppColors.green1 : AppColors.coral,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
-        content: Text(message),
+        content: SingleChildScrollView(
+          child: Text(
+            message,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(success ? {'success': true, 'message': message} : null); // Close checkout
-            },
-            child: const Text('OK'),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(success ? {'success': true, 'message': message} : null); // Close checkout
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: success ? AppColors.green1 : AppColors.coral,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('OK'),
+            ),
           ),
         ],
       ),

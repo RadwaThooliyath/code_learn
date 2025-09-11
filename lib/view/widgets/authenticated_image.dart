@@ -55,10 +55,12 @@ class _AuthenticatedImageState extends State<AuthenticatedImage> {
       );
 
       if (response.statusCode == 200) {
-        setState(() {
-          _imageBytes = response.bodyBytes;
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _imageBytes = response.bodyBytes;
+            _isLoading = false;
+          });
+        }
 
       } else if (response.statusCode == 404) {
 
@@ -67,11 +69,12 @@ class _AuthenticatedImageState extends State<AuthenticatedImage> {
         throw Exception('HTTP ${response.statusCode}: ${response.reasonPhrase}');
       }
     } catch (e) {
-
-      setState(() {
-        _error = e;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e;
+          _isLoading = false;
+        });
+      }
     }
   }
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:uptrail/app_constants/colors.dart';
 import 'package:uptrail/model/quiz_model.dart';
 import 'package:uptrail/utils/app_text_style.dart';
+import 'package:uptrail/utils/app_decoration.dart';
+import 'package:uptrail/utils/app_spacing.dart';
 
 class QuizResultsPage extends StatelessWidget {
   final Quiz quiz;
@@ -20,17 +22,13 @@ class QuizResultsPage extends StatelessWidget {
                     attempt.isPassed.toLowerCase() == 'passed';
     
     return Scaffold(
-      backgroundColor: AppColors.logoLightGray,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Quiz Results',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyle.headline2,
         ),
-        backgroundColor: isPassed ? AppColors.logoGreen : AppColors.coral,
+        backgroundColor: AppColors.background,
         iconTheme: const IconThemeData(color: Colors.white),
         automaticallyImplyLeading: false,
         elevation: 0,
@@ -42,40 +40,31 @@ class QuizResultsPage extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: AppSpacing.screenPadding,
         child: Column(
           children: [
             // Main Results Card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(32),
+              padding: AppSpacing.paddingXL,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: isPassed ? [
-                    Colors.white,
-                    AppColors.logoGreen.withValues(alpha: 0.05),
+                    AppColors.champagnePink,
+                    AppColors.champagnePink,
                   ] : [
                     Colors.white,
-                    AppColors.coral.withValues(alpha: 0.05),
+                    AppColors.champagnePink.withValues(alpha: 0.6),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: isPassed 
-                        ? AppColors.logoGreen.withValues(alpha: 0.1)
-                        : AppColors.coral.withValues(alpha: 0.1),
-                    spreadRadius: 3,
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                borderRadius: AppDecoration.borderRadiusXL,
+                boxShadow: AppDecoration.mediumShadow,
                 border: Border.all(
                   color: isPassed 
-                      ? AppColors.logoGreen.withValues(alpha: 0.2)
-                      : AppColors.coral.withValues(alpha: 0.2),
+                      ? AppColors.champagnePink.withValues(alpha: 0.2)
+                      : AppColors.brightPinkCrayola,
                   width: 1,
                 ),
               ),
@@ -83,22 +72,22 @@ class QuizResultsPage extends StatelessWidget {
                 children: [
                   // Status Icon with Animation-like Effect
                   Container(
-                    width: 140,
-                    height: 140,
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: isPassed 
-                          ? [AppColors.logoGreen, AppColors.logoGreen.withValues(alpha: 0.8)]
-                          : [AppColors.coral, AppColors.brightPinkCrayola.withValues(alpha: 0.8)],
+                          ? [AppColors.brightPinkCrayola, AppColors.champagnePink]
+                          : [AppColors.coral, AppColors.brightPinkCrayola],
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: isPassed 
-                              ? AppColors.logoGreen.withValues(alpha: 0.4)
-                              : AppColors.coral.withValues(alpha: 0.4),
-                          spreadRadius: 8,
-                          blurRadius: 25,
+                              ? AppColors.green1.withValues(alpha: 0.3)
+                              : AppColors.coral.withValues(alpha: 0.3),
+                          spreadRadius: 4,
+                          blurRadius: 20,
                           offset: const Offset(0, 0),
                         ),
                       ],
@@ -113,25 +102,25 @@ class QuizResultsPage extends StatelessWidget {
                       ),
                       child: Icon(
                         isPassed ? Icons.emoji_events : Icons.trending_up,
-                        size: 70,
+                        size: 60,
                         color: Colors.white,
                       ),
                     ),
                   ),
                   
-                  const SizedBox(height: 24),
+                  AppSpacing.medium,
                   
                   // Status Text
                   Text(
-                    isPassed ? '🎉 Congratulations!' : '💪 Keep Trying!',
+                    isPassed ? 'Congratulations!' : 'Keep Trying!',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: isPassed ? AppColors.logoGreen : AppColors.coral,
+                      color: isPassed ? Colors.black54 : AppColors.coral,
                     ),
                   ),
                   
-                  const SizedBox(height: 8),
+                  AppSpacing.verySmall,
                   
                   Text(
                     isPassed 
@@ -145,12 +134,12 @@ class QuizResultsPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   
-                  const SizedBox(height: 32),
+                  AppSpacing.large,
                   
                   // Score Circle
                   Container(
-                    width: 180,
-                    height: 180,
+                    width: 160,
+                    height: 160,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -158,28 +147,19 @@ class QuizResultsPage extends StatelessWidget {
                         end: Alignment.bottomRight,
                         colors: isPassed 
                           ? [
-                              AppColors.logoGreen.withValues(alpha: 0.1),
-                              AppColors.logoGreen.withValues(alpha: 0.2),
+                              AppColors.champagnePink.withValues(alpha: 0.8),
+                              AppColors.champagnePink.withValues(alpha: 0.1),
                             ]
                           : [
+                              AppColors.champagnePink.withValues(alpha: 0.8),
                               AppColors.coral.withValues(alpha: 0.1),
-                              AppColors.brightPinkCrayola.withValues(alpha: 0.2),
                             ],
                       ),
                       border: Border.all(
-                        color: isPassed ? AppColors.logoGreen : AppColors.coral,
-                        width: 4,
+                        color: isPassed ? AppColors.green1 : AppColors.coral,
+                        width: 3,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isPassed 
-                              ? AppColors.logoGreen.withValues(alpha: 0.2)
-                              : AppColors.coral.withValues(alpha: 0.2),
-                          spreadRadius: 4,
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      boxShadow: AppDecoration.softShadow,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -187,45 +167,36 @@ class QuizResultsPage extends StatelessWidget {
                         Text(
                           '${attempt.score ?? 0}',
                           style: TextStyle(
-                            fontSize: 54,
+                            fontSize: 48,
                             fontWeight: FontWeight.bold,
-                            color: isPassed ? AppColors.logoGreen : AppColors.coral,
+                            color: isPassed ? AppColors.green1 : AppColors.coral,
                           ),
                         ),
                         Text(
                           'out of ${quiz.maxPoints}',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        AppSpacing.verySmall,
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: isPassed 
-                                  ? [AppColors.logoGreen, AppColors.logoGreen.withValues(alpha: 0.8)]
+                                  ? [AppColors.green1, AppColors.robinEggBlue]
                                   : [AppColors.coral, AppColors.brightPinkCrayola],
                             ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: isPassed 
-                                    ? AppColors.logoGreen.withValues(alpha: 0.3)
-                                    : AppColors.coral.withValues(alpha: 0.3),
-                                spreadRadius: 1,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            borderRadius: AppDecoration.borderRadiusXL,
+                            boxShadow: AppDecoration.softShadow,
                           ),
                           child: Text(
                             '${scorePercentage.toStringAsFixed(0)}%',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -237,44 +208,39 @@ class QuizResultsPage extends StatelessWidget {
               ),
             ),
             
-            const SizedBox(height: 24),
+            AppSpacing.medium,
             
             // Quiz Details Card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: AppSpacing.paddingL,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    spreadRadius: 2,
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                border: Border.all(
-                  color: Colors.grey[200]!,
-                  width: 1,
-                ),
+                color: AppColors.champagnePink,
+                borderRadius: BorderRadius.circular(16)
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.quiz_outlined,
-                        color: AppColors.logoBrightBlue,
-                        size: 24,
+                      Container(
+                        padding: AppSpacing.paddingS,
+                        decoration: BoxDecoration(
+                          color: AppColors.champagnePink,
+                          borderRadius: AppDecoration.borderRadiusS,
+                        ),
+                        child: Icon(
+                          Icons.quiz_outlined,
+                          color: AppColors.logoBrightBlue,
+                          size: 20,
+                        ),
                       ),
-                      const SizedBox(width: 8),
+                      AppSpacing.hSmall,
                       Expanded(
                         child: Text(
                           quiz.title,
                           style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
@@ -285,19 +251,23 @@ class QuizResultsPage extends StatelessWidget {
                     ],
                   ),
                   
-                  const SizedBox(height: 16),
+                  AppSpacing.small,
                   
-                  // Details Grid
+                  // Details Grid - Fixed render flex issue with Flexible
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
+                      Flexible(
+                        flex: 1,
                         child: _buildDetailItem(
                           Icons.timer_outlined,
                           'Time Taken',
                           _formatTime(attempt.timeSpent),
                         ),
                       ),
-                      Expanded(
+                      AppSpacing.hSmall,
+                      Flexible(
+                        flex: 1,
                         child: _buildDetailItem(
                           Icons.help_outline,
                           'Questions',
@@ -307,22 +277,26 @@ class QuizResultsPage extends StatelessWidget {
                     ],
                   ),
                   
-                  const SizedBox(height: 12),
+                  AppSpacing.small,
                   
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
+                      Flexible(
+                        flex: 1,
                         child: _buildDetailItem(
                           Icons.trending_up_outlined,
                           'Passing Score',
                           '${quiz.passingScore}%',
                         ),
                       ),
-                      Expanded(
+                      AppSpacing.hSmall,
+                      Flexible(
+                        flex: 1,
                         child: _buildDetailItem(
                           Icons.repeat_outlined,
                           'Attempt',
-                          '${attempt.attemptNumber}/${quiz.maxAttempts}',
+                          '#${attempt.attemptNumber}',
                         ),
                       ),
                     ],
@@ -331,99 +305,71 @@ class QuizResultsPage extends StatelessWidget {
               ),
             ),
             
-            const SizedBox(height: 24),
+            AppSpacing.medium,
             
             // Feedback Section
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: AppSpacing.paddingL,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: isPassed ? [
-                    AppColors.logoGreen.withValues(alpha: 0.05),
-                    AppColors.logoGreen.withValues(alpha: 0.1),
+                    AppColors.green2,
+                    AppColors.green1,
                   ] : [
-                    AppColors.logoYellow.withValues(alpha: 0.05),
-                    AppColors.coral.withValues(alpha: 0.1),
+                    AppColors.champagnePink.withValues(alpha: 0.8),
+                    AppColors.coral.withValues(alpha: 0.2),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: AppDecoration.borderRadiusL,
                 border: Border.all(
-                  color: isPassed ? AppColors.logoGreen.withValues(alpha: 0.3) : AppColors.coral.withValues(alpha: 0.3),
-                  width: 2,
+                  color: isPassed ? AppColors.green1.withValues(alpha: 0.3) : AppColors.coral.withValues(alpha: 0.3),
+                  width: 1,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: isPassed 
-                        ? AppColors.logoGreen.withValues(alpha: 0.1)
-                        : AppColors.coral.withValues(alpha: 0.1),
-                    spreadRadius: 1,
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                boxShadow: AppDecoration.softShadow,
               ),
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isPassed ? AppColors.logoGreen : AppColors.coral,
+                      color: isPassed ? AppColors.green1 : AppColors.coral,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: isPassed 
-                              ? AppColors.logoGreen.withValues(alpha: 0.3)
-                              : AppColors.coral.withValues(alpha: 0.3),
-                          spreadRadius: 2,
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      boxShadow: AppDecoration.softShadow,
                     ),
                     child: Icon(
                       isPassed ? Icons.star : Icons.trending_up,
                       color: Colors.white,
-                      size: 28,
+                      size: 24,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  AppSpacing.small,
                   Text(
                     isPassed 
-                        ? '🌟 Excellent work! You have successfully mastered this topic.'
-                        : '📚 Don\'t give up! Review the material and try again.',
+                        ? 'Excellent work! You have successfully mastered this topic.'
+                        : 'Don\'t give up! Review the material and try again.',
                     style: TextStyle(
-                      fontSize: 17,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: isPassed ? AppColors.logoGreen : AppColors.coral,
+                      color: isPassed ? AppColors.white : Colors.black87,
                       height: 1.4,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  if (!isPassed && quiz.maxAttempts > attempt.attemptNumber) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'You have ${quiz.maxAttempts - attempt.attemptNumber} attempts remaining.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.orange[600],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
                 ],
               ),
             ),
             
-            const SizedBox(height: 32),
+            AppSpacing.large,
             
-            // Action Buttons
-            Row(
+            // Action Buttons - Fixed render flex issue
+            Column(
               children: [
-                if (!isPassed && quiz.maxAttempts > attempt.attemptNumber)
-                  Expanded(
+                if (!isPassed)
+                  SizedBox(
+                    width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.refresh),
@@ -432,39 +378,40 @@ class QuizResultsPage extends StatelessWidget {
                         backgroundColor: AppColors.coral,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        elevation: 4,
-                        shadowColor: AppColors.coral.withValues(alpha: 0.4),
+                        elevation: 2,
+                        shadowColor: AppColors.coral.withValues(alpha: 0.3),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: AppDecoration.borderRadiusL,
                         ),
                       ),
                     ),
                   ),
                 
-                if (!isPassed && quiz.maxAttempts > attempt.attemptNumber)
-                  const SizedBox(width: 16),
+                if (!isPassed)
+                  AppSpacing.small,
                 
-                Expanded(
+                SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brightPinkCrayola,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.arrow_back),
                     label: const Text('Back to Course'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.logoBrightBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 4,
-                      shadowColor: AppColors.logoBrightBlue.withValues(alpha: 0.4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
+
                   ),
                 ),
               ],
             ),
             
-            const SizedBox(height: 20),
+            AppSpacing.medium,
           ],
         ),
       ),
@@ -472,38 +419,56 @@ class QuizResultsPage extends StatelessWidget {
   }
 
   Widget _buildDetailItem(IconData icon, String label, String value) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          color: AppColors.logoBrightBlue,
-          size: 20,
+    return Container(
+      padding: AppSpacing.paddingM,
+      decoration: BoxDecoration(
+        color: AppColors.champagnePink.withValues(alpha: 0.2),
+        borderRadius: AppDecoration.borderRadiusM,
+        border: Border.all(
+          color: AppColors.brightPinkCrayola.withValues(alpha: 0.5),
+          width: 1,
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: AppSpacing.paddingS,
+            decoration: BoxDecoration(
+              color: AppColors.logoBrightBlue.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.logoBrightBlue,
+              size: 18,
+            ),
           ),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+          AppSpacing.verySmall,
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 

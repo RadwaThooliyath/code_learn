@@ -95,4 +95,48 @@ class ApiConstants {
   static String userRatingStatus(int courseId) => "$baseUrl/ratings/course/$courseId/rating-status/";
   static String courseReviews(int courseId) => "$baseUrl/ratings/course/$courseId/reviews/";
   static String toggleReviewHelpful(int reviewId) => "$baseUrl/ratings/review/$reviewId/helpful/";
+
+  // Content Management URLs
+  static const String contentBaseUrl = "$baseUrl/content";
+  
+  // Dashboard endpoint
+  static const String dashboardEndpoint = "/dashboard/";
+  
+  // News endpoints
+  static const String newsEndpoint = "/news/";
+  
+  // Placements endpoints
+  static const String placementsEndpoint = "/placements/";
+  
+  // Testimonials endpoints
+  static const String testimonialsEndpoint = "/testimonials/";
+  
+  // Lead submission endpoint
+  static const String leadSubmissionEndpoint = "/leads/submit/";
+  
+  // User leads endpoints
+  static const String myLeadsEndpoint = "/leads/my-leads/";
+  
+  // Search endpoint
+  static const String searchEndpoint = "/search/";
+  
+  // Categories endpoint
+  static const String categoriesEndpoint = "/categories/";
+  
+  // Content URLs
+  static String get contentDashboard => "$contentBaseUrl$dashboardEndpoint";
+  static String get contentNews => "$contentBaseUrl$newsEndpoint";
+  static String get contentPlacements => "$contentBaseUrl$placementsEndpoint";
+  static String get contentTestimonials => "$contentBaseUrl$testimonialsEndpoint";
+  static String get contentLeadSubmission => "$contentBaseUrl$leadSubmissionEndpoint";
+  static String get contentMyLeads => "$contentBaseUrl$myLeadsEndpoint";
+  static String get contentSearch => "$contentBaseUrl$searchEndpoint";
+  static String get contentCategories => "$contentBaseUrl$categoriesEndpoint";
+  
+  // Content detail URLs
+  static String newsDetail(String slug) => "$contentBaseUrl$newsEndpoint$slug/";
+  static String placementDetail(int id) => "$contentBaseUrl$placementsEndpoint$id/";
+  static String testimonialDetail(int id) => "$contentBaseUrl$testimonialsEndpoint$id/";
+  static String testimonialLike(int id) => "$contentBaseUrl$testimonialsEndpoint$id/like/";
+  static String myLeadDetail(int leadId) => "$contentBaseUrl$myLeadsEndpoint$leadId/";
 }

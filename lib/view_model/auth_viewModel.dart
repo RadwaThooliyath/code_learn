@@ -62,6 +62,7 @@ class AuthViewModel extends ChangeNotifier {
             id: int.tryParse(userData['userId']!),
             name: userData['name'],
             email: userData['email'], // Can be null
+            phone: userData['phone'], // Can be null
             role: null,
           );
           _setUser(user);
@@ -184,6 +185,14 @@ class AuthViewModel extends ChangeNotifier {
       final profileData = await _profileService.getUserProfile();
       if (profileData != null) {
         _setUser(profileData);
+        
+        // Save updated profile data to storage
+        await StorageService.saveUserData(
+          userId: profileData.id.toString(),
+          name: profileData.name ?? '',
+          email: profileData.email,
+          phone: profileData.phone ?? profileData.phoneNumber,
+        );
       }
     } catch (e) {
     } finally {

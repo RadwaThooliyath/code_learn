@@ -30,15 +30,7 @@ class _RegisterpageState extends State<Registerpage> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.green2.withValues(alpha: 0.8),
-              AppColors.green1.withValues(alpha: 0.7),
-              AppColors.logoDarkTeal.withValues(alpha: 0.9),
-            ],
-          ),
+        color: AppColors.brightPinkCrayola.withValues(alpha: 0.5),
         ),
         child: SafeArea(
           child: Center(
@@ -169,11 +161,13 @@ class _RegisterpageState extends State<Registerpage> {
                               decoration: AppDecoration.accentGradientDecoration,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
+                                  backgroundColor: AppColors.brightPinkCrayola,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: AppDecoration.borderRadiusL,
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
+                                  elevation: 2,
                                 ),
                                 onPressed: authViewModel.isLoading ? null : () async {
                                   if (_formKey.currentState!.validate()) {

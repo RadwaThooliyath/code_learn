@@ -4,6 +4,9 @@ import 'package:uptrail/app_constants/colors.dart';
 import 'package:uptrail/model/quiz_model.dart';
 import 'package:uptrail/services/quiz_service.dart';
 import 'package:uptrail/view/quiz_results_page.dart';
+import 'package:uptrail/utils/app_decoration.dart';
+import 'package:uptrail/utils/app_spacing.dart';
+import 'package:uptrail/utils/app_text_style.dart';
 
 class QuizTakingPage extends StatefulWidget {
   final Quiz quiz;
@@ -277,14 +280,15 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
         appBar: AppBar(
           title: Text(
             widget.quiz.title,
-            style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            style: AppTextStyle.headline2,
           ),
           backgroundColor: AppColors.background,
           iconTheme: const IconThemeData(color: Colors.white),
+          elevation: 0,
         ),
         body: const Center(
           child: CircularProgressIndicator(
-            color: AppColors.logoBrightBlue,
+            color: AppColors.robinEggBlue,
           ),
         ),
       );
@@ -312,13 +316,13 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
         return shouldExit ?? false;
       },
       child: Scaffold(
-        backgroundColor: AppColors.logoLightGray,
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           title: Text(
             widget.quiz.title,
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            style: AppTextStyle.headline2,
           ),
-          backgroundColor: AppColors.logoBrightBlue,
+          backgroundColor: AppColors.background,
           iconTheme: const IconThemeData(color: Colors.white),
           elevation: 0,
           actions: [
@@ -327,17 +331,10 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
                 color: _remainingTimeInSeconds < 300 
-                    ? AppColors.brightPinkCrayola 
+                    ? AppColors.coral 
                     : Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                borderRadius: AppDecoration.borderRadiusM,
+                boxShadow: AppDecoration.softShadow,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -347,7 +344,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                     size: 16,
                     color: _remainingTimeInSeconds < 300 
                         ? Colors.white 
-                        : AppColors.logoBrightBlue,
+                        : AppColors.robinEggBlue,
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -355,7 +352,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                     style: TextStyle(
                       color: _remainingTimeInSeconds < 300 
                           ? Colors.white 
-                          : AppColors.logoBrightBlue,
+                          : AppColors.robinEggBlue,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -369,24 +366,10 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
           children: [
             // Progress indicator
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: AppSpacing.paddingL,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.logoBrightBlue.withValues(alpha: 0.1),
-                    AppColors.logoGreen.withValues(alpha: 0.1),
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                color: Colors.white,
+                boxShadow: AppDecoration.softShadow,
               ),
               child: Column(
                 children: [
@@ -404,7 +387,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          AppSpacing.verySmall,
                           Text(
                             'Progress: ${((_currentQuestionIndex + 1) / widget.quiz.questions.length * 100).toStringAsFixed(0)}%',
                             style: TextStyle(
@@ -417,8 +400,8 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.logoGreen,
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppColors.green1,
+                          borderRadius: AppDecoration.borderRadiusXL,
                         ),
                         child: Text(
                           '${widget.quiz.questions[_currentQuestionIndex].points} point${widget.quiz.questions[_currentQuestionIndex].points != 1 ? 's' : ''}',
@@ -431,13 +414,13 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.small,
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: AppDecoration.borderRadiusS,
                     child: LinearProgressIndicator(
                       value: (_currentQuestionIndex + 1) / widget.quiz.questions.length,
                       backgroundColor: Colors.grey[200],
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.logoGreen),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.green1),
                       minHeight: 6,
                     ),
                   ),
@@ -464,12 +447,12 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
             
             // Navigation and question overview
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: AppSpacing.paddingL,
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withValues(alpha: 0.08),
                     spreadRadius: 2,
                     blurRadius: 8,
                     offset: const Offset(0, -4),
@@ -479,80 +462,74 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
               child: Column(
                 children: [
                   // Question overview dots
-                  Wrap(
-                    spacing: 8,
-                    children: List.generate(widget.quiz.questions.length, (index) {
-                      final question = widget.quiz.questions[index];
-                      final isAnswered = question.questionType == 'multiple_choice'
-                          ? _selectedAnswers.containsKey(question.id) && _selectedAnswers[question.id]!.isNotEmpty
-                          : _textAnswers.containsKey(question.id) && _textAnswers[question.id]?.trim().isNotEmpty == true;
-                      
-                      return GestureDetector(
-                        onTap: () => _goToQuestion(index),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: 36,
-                          height: 36,
-                          margin: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            gradient: index == _currentQuestionIndex
-                                ? LinearGradient(
-                                    colors: [AppColors.logoBrightBlue, AppColors.logoGreen],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  )
-                                : isAnswered
-                                    ? LinearGradient(
-                                        colors: [AppColors.logoGreen, AppColors.logoGreen.withValues(alpha: 0.8)],
-                                      )
-                                    : null,
-                            color: index == _currentQuestionIndex || isAnswered 
-                                ? null 
-                                : Colors.grey[200],
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: index == _currentQuestionIndex
-                                  ? AppColors.logoBrightBlue
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(widget.quiz.questions.length, (index) {
+                        final question = widget.quiz.questions[index];
+                        final isAnswered = question.questionType == 'multiple_choice'
+                            ? _selectedAnswers.containsKey(question.id) && _selectedAnswers[question.id]!.isNotEmpty
+                            : _textAnswers.containsKey(question.id) && _textAnswers[question.id]?.trim().isNotEmpty == true;
+                        
+                        return GestureDetector(
+                          onTap: () => _goToQuestion(index),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 32,
+                            height: 32,
+                            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            decoration: BoxDecoration(
+                              gradient: index == _currentQuestionIndex
+                                  ? LinearGradient(
+                                      colors: [AppColors.robinEggBlue, AppColors.green1],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    )
                                   : isAnswered
-                                      ? AppColors.logoGreen
-                                      : Colors.grey[400]!,
-                              width: index == _currentQuestionIndex ? 2 : 1,
-                            ),
-                            boxShadow: index == _currentQuestionIndex || isAnswered ? [
-                              BoxShadow(
-                                color: (index == _currentQuestionIndex 
-                                    ? AppColors.logoBrightBlue 
-                                    : AppColors.logoGreen).withValues(alpha: 0.3),
-                                spreadRadius: 1,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
+                                      ? LinearGradient(
+                                          colors: [AppColors.green1, AppColors.green1.withValues(alpha: 0.8)],
+                                        )
+                                      : null,
+                              color: index == _currentQuestionIndex || isAnswered 
+                                  ? null 
+                                  : Colors.grey[200],
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: index == _currentQuestionIndex
+                                    ? AppColors.robinEggBlue
+                                    : isAnswered
+                                        ? AppColors.green1
+                                        : Colors.grey[400]!,
+                                width: index == _currentQuestionIndex ? 2 : 1,
                               ),
-                            ] : null,
-                          ),
-                          child: Center(
-                            child: isAnswered && index != _currentQuestionIndex
-                                ? Icon(
-                                    Icons.check,
-                                    size: 16,
-                                    color: Colors.white,
-                                  )
-                                : Text(
-                                    '${index + 1}',
-                                    style: TextStyle(
-                                      color: index == _currentQuestionIndex || isAnswered
-                                          ? Colors.white
-                                          : Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
+                              boxShadow: index == _currentQuestionIndex || isAnswered ? AppDecoration.softShadow : null,
+                            ),
+                            child: Center(
+                              child: isAnswered && index != _currentQuestionIndex
+                                  ? Icon(
+                                      Icons.check,
+                                      size: 14,
+                                      color: Colors.white,
+                                    )
+                                  : Text(
+                                      '${index + 1}',
+                                      style: TextStyle(
+                                        color: index == _currentQuestionIndex || isAnswered
+                                            ? Colors.white
+                                            : Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 11,
+                                      ),
                                     ),
-                                  ),
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
+                    ),
                   ),
                   
-                  const SizedBox(height: 16),
+                  AppSpacing.small,
                   
                   // Navigation buttons
                   Row(
@@ -564,21 +541,27 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.grey[600],
                               foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppDecoration.borderRadiusM,
+                              ),
                             ),
                             child: const Text('Previous'),
                           ),
                         ),
                       
                       if (_currentQuestionIndex > 0 && _currentQuestionIndex < widget.quiz.questions.length - 1)
-                        const SizedBox(width: 16),
+                        AppSpacing.hMedium,
                       
                       if (_currentQuestionIndex < widget.quiz.questions.length - 1)
                         Expanded(
                           child: ElevatedButton(
                             onPressed: _nextQuestion,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.logoBrightBlue,
+                              backgroundColor: AppColors.robinEggBlue,
                               foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppDecoration.borderRadiusM,
+                              ),
                             ),
                             child: const Text('Next'),
                           ),
@@ -589,8 +572,11 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                           child: ElevatedButton(
                             onPressed: _isSubmitting ? null : _submitQuiz,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                              backgroundColor: AppColors.green1,
                               foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppDecoration.borderRadiusM,
+                              ),
                             ),
                             child: _isSubmitting
                                 ? const SizedBox(
@@ -617,45 +603,34 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
 
   Widget _buildQuestionCard(QuizQuestion question) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: AppSpacing.screenPadding,
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: AppDecoration.cardDecoration,
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.paddingL,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: AppSpacing.paddingS,
                     decoration: BoxDecoration(
-                      color: AppColors.logoBrightBlue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppColors.robinEggBlue.withValues(alpha: 0.1),
+                      borderRadius: AppDecoration.borderRadiusS,
                     ),
                     child: Icon(
                       Icons.quiz,
-                      color: AppColors.logoBrightBlue,
+                      color: AppColors.robinEggBlue,
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  AppSpacing.hSmall,
                   Expanded(
                     child: Text(
                       'Question ${_currentQuestionIndex + 1}',
                       style: TextStyle(
-                        color: AppColors.logoBrightBlue,
+                        color: AppColors.robinEggBlue,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -663,7 +638,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              AppSpacing.small,
               Text(
                 question.questionText,
                 style: const TextStyle(
@@ -673,7 +648,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                   height: 1.4,
                 ),
               ),
-              const SizedBox(height: 24),
+              AppSpacing.medium,
               
               if (question.questionType == 'multiple_choice')
                 ..._buildMultipleChoiceOptions(question),
@@ -700,35 +675,28 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => _selectAnswer(question.id, choice.id),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppDecoration.borderRadiusM,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.paddingM,
               decoration: BoxDecoration(
                 gradient: isSelected 
                     ? LinearGradient(
                         colors: [
-                          AppColors.logoBrightBlue.withValues(alpha: 0.1),
-                          AppColors.logoGreen.withValues(alpha: 0.05),
+                          AppColors.robinEggBlue.withValues(alpha: 0.1),
+                          AppColors.green1.withValues(alpha: 0.05),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       )
                     : null,
                 border: Border.all(
-                  color: isSelected ? AppColors.logoBrightBlue : Colors.grey[300]!,
+                  color: isSelected ? AppColors.robinEggBlue : Colors.grey[300]!,
                   width: isSelected ? 2 : 1,
                 ),
-                borderRadius: BorderRadius.circular(12),
-                color: isSelected ? null : AppColors.logoLightGray,
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: AppColors.logoBrightBlue.withValues(alpha: 0.2),
-                    spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ] : null,
+                borderRadius: AppDecoration.borderRadiusM,
+                color: isSelected ? null : Colors.grey[50],
+                boxShadow: isSelected ? AppDecoration.softShadow : null,
               ),
               child: Row(
                 children: [
@@ -738,37 +706,30 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                     height: 32,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isSelected ? AppColors.logoBrightBlue : Colors.white,
+                      color: isSelected ? AppColors.robinEggBlue : Colors.white,
                       border: Border.all(
-                        color: isSelected ? AppColors.logoBrightBlue : Colors.grey[400]!,
+                        color: isSelected ? AppColors.robinEggBlue : Colors.grey[400]!,
                         width: 2,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          spreadRadius: 1,
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
+                      boxShadow: AppDecoration.softShadow,
                     ),
                     child: Center(
                       child: Text(
                         optionLetter,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.logoBrightBlue,
+                          color: isSelected ? Colors.white : AppColors.robinEggBlue,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  AppSpacing.hMedium,
                   Expanded(
                     child: Text(
                       choice.choiceText,
                       style: TextStyle(
-                        color: isSelected ? Colors.black87 : Colors.black87,
+                        color: Colors.black87,
                         fontSize: 16,
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                         height: 1.4,
@@ -778,7 +739,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                   if (isSelected)
                     Icon(
                       Icons.check_circle,
-                      color: AppColors.logoGreen,
+                      color: AppColors.green1,
                       size: 20,
                     ),
                 ],
@@ -793,15 +754,8 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
   Widget _buildTextAnswerField(QuizQuestion question) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: AppDecoration.borderRadiusM,
+        boxShadow: AppDecoration.softShadow,
       ),
       child: TextFormField(
         onChanged: (value) => _setTextAnswer(question.id, value),
@@ -811,32 +765,13 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
           color: Colors.black87,
           height: 1.4,
         ),
-        decoration: InputDecoration(
+        decoration: AppDecoration.formFieldDecoration(
           hintText: 'Type your answer here...',
-          hintStyle: TextStyle(
-            color: Colors.grey[500],
-            fontSize: 16,
-          ),
-          filled: true,
-          fillColor: AppColors.logoLightGray,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.logoBrightBlue, width: 2),
-          ),
-          contentPadding: const EdgeInsets.all(16),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
             child: Icon(
               Icons.edit_note,
-              color: AppColors.logoBrightBlue,
+              color: AppColors.robinEggBlue,
               size: 20,
             ),
           ),

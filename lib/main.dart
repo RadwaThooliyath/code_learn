@@ -3,6 +3,7 @@ import 'package:uptrail/view/navigPage.dart';
 import 'package:uptrail/view/splash_screen.dart';
 import 'package:uptrail/view_model/auth_viewModel.dart';
 import 'package:uptrail/view_model/course_viewmodel.dart';
+import 'package:uptrail/view_model/content_viewmodel.dart';
 import 'package:uptrail/services/security_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthViewModel()),
         ChangeNotifierProvider(create: (context) => CourseViewModel()),
+        ChangeNotifierProvider(create: (context) => ContentViewModel()),
       ],
       child: MaterialApp(
         title: 'Uptrail',

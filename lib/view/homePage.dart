@@ -13,6 +13,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../model/course_model.dart';
 import 'widgets/real_course_list.dart';
 import 'widgets/whatsapp_support_button.dart';
+import 'widgets/app_drawer.dart';
+import 'dashboard_page.dart';
+import 'lead_submission_page.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -42,6 +45,7 @@ class _HomepageState extends State<Homepage> {
       children: [
         Scaffold(
           backgroundColor: AppColors.background,
+          drawer: const AppDrawer(),
           body: Container(
             color: AppColors.background,
             child: SafeArea(
@@ -53,6 +57,7 @@ class _HomepageState extends State<Homepage> {
                     pinned: true,
                     backgroundColor: AppColors.background,
                     elevation: 0,
+                    automaticallyImplyLeading: false,
                     flexibleSpace: Container(
                       color: AppColors.background,
                       child: Padding(
@@ -60,15 +65,28 @@ class _HomepageState extends State<Homepage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Logo/Brand section
+                            // Menu button and Logo/Brand section
                             Row(
                               children: [
+                                Builder(
+                                  builder: (context) => IconButton(
+                                    icon: const Icon(
+                                      Icons.menu,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                    onPressed: () {
+                                      Scaffold.of(context).openDrawer();
+                                    },
+                                    padding: const EdgeInsets.all(8),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
                                 Container(
                                   width: 32,
                                   height: 32,
                                   decoration: BoxDecoration(
-                                    color: AppColors.logoDarkTeal,
-
+                                    color: AppColors.champagnePink,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Padding(
@@ -199,12 +217,120 @@ class _HomepageState extends State<Homepage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              const SizedBox(height: 16),
+                              // Action Buttons Row
+                              Row(
+                                children: [
+                                  // Dashboard Quick Access Button
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const DashboardPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              AppColors.brightPinkCrayola,
+                                              AppColors.logoBrightBlue,
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: AppColors.brightPinkCrayola.withValues(alpha: 0.3),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.dashboard,
+                                              color: AppColors.white,
+                                              size: 18,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "Dashboard",
+                                              style: TextStyle(
+                                                color: AppColors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // Lead Submission Button
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const LeadSubmissionPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              AppColors.logoBrightBlue,
+                                              AppColors.robinEggBlue,
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: AppColors.logoDarkTeal.withValues(alpha: 0.3),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.rocket_launch,
+                                              color: AppColors.logoDarkTeal,
+                                              size: 18,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "Live Sessions",
+                                              style: TextStyle(
+                                                color: AppColors.logoDarkTeal,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           );
                         },
                       ),
                     ),
                   ),
+
                   SliverToBoxAdapter(
                     child: Container(
                       color: AppColors.background,

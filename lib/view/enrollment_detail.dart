@@ -390,14 +390,14 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildCourseInfo(),
-            const SizedBox(height: 24),
+
             _buildPaymentSummary(),
-            const SizedBox(height: 24),
+
             if (_loadedInstallments.isNotEmpty ||
                 (widget.enrollment.installments != null &&
                  widget.enrollment.installments!.isNotEmpty))
               _buildInstallmentOverview(),
-            const SizedBox(height: 24),
+
             _buildPaymentHistorySection(),
           ],
         ),
@@ -1121,7 +1121,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
 
   Widget _buildCourseInfo() {
     return Card(
-      color: AppColors.white,
+      color: AppColors.champagnePink,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1129,46 +1129,9 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
           children: [
             Row(
               children: [
-                if (widget.enrollment.courseImage != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      widget.enrollment.courseImage!,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.book,
-                            size: 40,
-                            color: Colors.black54,
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                else
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.book,
-                      size: 40,
-                      color: Colors.black54,
-                    ),
-                  ),
-                const SizedBox(width: 16),
+
+
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1177,7 +1140,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
                         widget.enrollment.courseName,
                         style: const TextStyle(
                           color: Colors.black,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1214,7 +1177,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
 
   Widget _buildPaymentSummary() {
     return Card(
-      color: AppColors.white,
+      color: AppColors.champagnePink,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1324,7 +1287,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
         : widget.enrollment.installments ?? [];
     
     return Card(
-      color: AppColors.white,
+      color: AppColors.champagnePink,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1401,7 +1364,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
 
   Widget _buildPaymentCard(PaymentRecord payment) {
     return Card(
-      color: AppColors.white,
+      color: AppColors.champagnePink,
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -1608,7 +1571,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
     }
 
     return Card(
-      color: AppColors.white,
+      color: AppColors.champagnePink,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1654,7 +1617,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.champagnePink,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[200]!),
       ),

@@ -67,7 +67,7 @@ Please assist me with this matter. Thank you!
 ''';
 
     // WhatsApp support number - replace with your actual support number
-    const supportNumber = '+919876543210'; // Replace with actual WhatsApp support number
+    const supportNumber = '+919895663498'; // Replace with actual WhatsApp support number
     
     final whatsappUrl = 'https://wa.me/$supportNumber?text=${Uri.encodeComponent(message)}';
     
@@ -111,10 +111,11 @@ Please assist me with this matter. Thank you!
           color: Colors.white,
           borderRadius: AppDecoration.borderRadiusL,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Header
             Row(
               children: [
@@ -326,6 +327,7 @@ Please assist me with this matter. Thank you!
               ],
             ),
           ],
+          ),
         ),
       ),
     );

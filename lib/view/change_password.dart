@@ -72,10 +72,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.logoBrightBlue.withOpacity(0.1),
+        color: AppColors.robinEggBlue.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.logoBrightBlue.withOpacity(0.2),
+          color: AppColors.robinEggBlue.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -83,7 +83,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         children: [
           Icon(
             Icons.security,
-            color: AppColors.logoBrightBlue,
+            color: AppColors.robinEggBlue,
             size: 32,
           ),
           const SizedBox(width: 16),
@@ -202,7 +202,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
-        prefixIcon: Icon(icon, color: AppColors.logoBrightBlue),
+        prefixIcon: Icon(icon, color: AppColors.robinEggBlue),
         suffixIcon: IconButton(
           icon: Icon(
             showPassword ? Icons.visibility_off : Icons.visibility,
@@ -216,7 +216,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.logoBrightBlue, width: 2),
+          borderSide: const BorderSide(color: AppColors.robinEggBlue, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -254,7 +254,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           child: ElevatedButton(
             onPressed: _isLoading ? null : _changePassword,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.logoBrightBlue,
+              backgroundColor: AppColors.robinEggBlue,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
